@@ -79,6 +79,19 @@ Para regerar as tabelas do relatório a partir da medição:
 python src/tabelas.py --entrada resultados/resultados.json
 ```
 
+Para regerar o **PDF da entrega** depois de atualizar os números
+(`docs/Relatorio-Etapa1.pdf`, 6 páginas):
+
+```bash
+# Windows
+"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --headless=new \
+  --disable-gpu --no-pdf-header-footer \
+  --print-to-pdf="docs\Relatorio-Etapa1.pdf" "file:///C:/wks/projetofabio/docs/Relatorio-Etapa1.html"
+```
+
+Ou simplesmente abrir `docs/Relatorio-Etapa1.html` no navegador e dar **Ctrl+P** →
+"Salvar como PDF" → ativar **"Gráficos de segundo plano"**.
+
 ---
 
 ## Como o problema atende aos requisitos da lauda

@@ -121,6 +121,9 @@
   /* -------------------------------------------------------- IMPRESSAO */
   @page{size:A4; margin:16mm 15mm;}
   @media print{
+    /* Sem isto, o navegador descarta os fundos das tabelas, do bloco de
+       codigo e das barras do grafico -- e o grafico fica ilegivel. */
+    *{-webkit-print-color-adjust:exact !important; print-color-adjust:exact !important;}
     :root{
       --ink:#000; --ink-soft:#3c4a56; --ink-faint:#6b7883;
       --paper:#fff; --tint:#f2f5f7; --rule:#c8d2da; --rule-strong:#95a3ae;
