@@ -1,0 +1,32 @@
+ carimbo | quem | o_que         | sobre
+------------------------------------------------------------------------------
+       1 | C0   | ENVIA_BLOCO   | [2,50002)
+       2 | C0   | ENVIA_BLOCO   | [50002,100002)
+       2 | T1   | RECEBE_BLOCO  | [2,50002)
+       3 | C0   | ENVIA_BLOCO   | [100002,150002)
+       3 | T1   | CALCULA       | [2,50002) -> 5133 primos
+       3 | T2   | RECEBE_BLOCO  | [50002,100002)
+       4 | C0   | ENVIA_BLOCO   | [150002,200002)
+       4 | T1   | ENTRA_SC      | estado_global
+       4 | T2   | CALCULA       | [50002,100002) -> 4459 primos
+       4 | T3   | RECEBE_BLOCO  | [100002,150002)
+       5 | C0   | ENVIA_BLOCO   | [200002,250002)
+       5 | T1   | SAI_SC        | contagem=5133
+       5 | T2   | ENTRA_SC      | estado_global
+       5 | T3   | CALCULA       | [100002,150002) -> 4257 primos
+       5 | T4   | RECEBE_BLOCO  | [150002,200002)
+       6 | C0   | ENVIA_BLOCO   | [250002,300001)
+       6 | T1   | RECEBE_BLOCO  | [200002,250002)
+       6 | T2   | SAI_SC        | contagem=9592
+       6 | T3   | ENTRA_SC      | estado_global
+       6 | T4   | CALCULA       | [150002,200002) -> 4135 primos
+       7 | T1   | CALCULA       | [200002,250002) -> 4060 primos
+       7 | T2   | RECEBE_BLOCO  | [250002,300001)
+       7 | T3   | SAI_SC        | contagem=13849
+       7 | T4   | ENTRA_SC      | estado_global
+       8 | T1   | ENTRA_SC      | estado_global
+       8 | T2   | CALCULA       | [250002,300001) -> 3953 primos
+       8 | T4   | SAI_SC        | contagem=17984
+       9 | T1   | SAI_SC        | contagem=22044
+       9 | T2   | ENTRA_SC      | estado_global
+      10 | T2   | SAI_SC        | contagem=25997

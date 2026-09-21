@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# chaves e segredos NUNCA entram no repositorio
+*.pem
+*.key
+
+# saidas de teste (a medicao oficial, essa sim, fica versionada)
+resultados/teste.json
+
+# configuracao local de ferramentas
+.claude/
+.vscode/
+.idea/

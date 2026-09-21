@@ -1,0 +1,128 @@
+{
+  "gerado_em": "2026-09-21T19:28:53",
+  "maquina": {
+    "sistema": "Windows 11",
+    "processador": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+    "nucleos_logicos": 12,
+    "nucleos_fisicos": 6,
+    "python": "3.14.4",
+    "implementacao": "CPython"
+  },
+  "entrada": {
+    "n": 20000000,
+    "bloco": 10000,
+    "repeticoes": 3
+  },
+  "p_estimado": 0.97,
+  "verificacao": {
+    "metodo": "Crivo de Eratostenes",
+    "segundos": 0.6750738999980967,
+    "resultado": [
+      1270607,
+      19999999,
+      12272577818052
+    ]
+  },
+  "medicoes": [
+    {
+      "modo": "sequencial",
+      "trabalhadores": 1,
+      "tempos": [
+        133.88210369998706,
+        133.45977570000105,
+        131.3014819000091
+      ],
+      "mediana": 133.45977570000105,
+      "speedup": 1.0,
+      "eficiencia": 1.0,
+      "resultado": [
+        1270607,
+        19999999,
+        12272577818052
+      ],
+      "correto": true
+    },
+    {
+      "modo": "processos",
+      "trabalhadores": 2,
+      "tempos": [
+        86.35010489998967,
+        69.46582290000515,
+        73.11566369998036
+      ],
+      "mediana": 73.11566369998036,
+      "speedup": 1.8253239996238575,
+      "eficiencia": 0.9126619998119287,
+      "amdahl_previsto": 1.941747572815534,
+      "fracao_serial_medida": 0.09569588764084491,
+      "p_medido": 0.9043041123591551,
+      "resultado": [
+        1270607,
+        19999999,
+        12272577818052
+      ],
+      "correto": true
+    },
+    {
+      "modo": "processos",
+      "trabalhadores": 4,
+      "tempos": [
+        38.363014100003056,
+        44.13530960000935,
+        46.480835399997886
+      ],
+      "mediana": 44.13530960000935,
+      "speedup": 3.023877636965138,
+      "eficiencia": 0.7559694092412845,
+      "amdahl_previsto": 3.6697247706422016,
+      "fracao_serial_medida": 0.1076016162274928,
+      "p_medido": 0.8923983837725072,
+      "resultado": [
+        1270607,
+        19999999,
+        12272577818052
+      ],
+      "correto": true
+    },
+    {
+      "modo": "processos",
+      "trabalhadores": 8,
+      "tempos": [
+        30.538253799983067,
+        29.543616200011456,
+        29.37067480001133
+      ],
+      "mediana": 29.543616200011456,
+      "speedup": 4.517381176240344,
+      "eficiencia": 0.564672647030043,
+      "amdahl_previsto": 6.611570247933884,
+      "fracao_serial_medida": 0.11013393721113293,
+      "p_medido": 0.889866062788867,
+      "resultado": [
+        1270607,
+        19999999,
+        12272577818052
+      ],
+      "correto": true
+    },
+    {
+      "modo": "threads",
+      "trabalhadores": 4,
+      "tempos": [
+        146.61084989999654,
+        144.94655649998458,
+        147.43710539999302
+      ],
+      "mediana": 146.61084989999654,
+      "speedup": 0.9102994477627961,
+      "eficiencia": 0.22757486194069904,
+      "resultado": [
+        1270607,
+        19999999,
+        12272577818052
+      ],
+      "correto": true
+    }
+  ],
+  "todos_corretos": true
+}

@@ -1,0 +1,49 @@
+==============================================================================
+MEDICAO DE DESEMPENHO - contagem de primos em [2, N]
+==============================================================================
+maquina  : Windows 11 | AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD
+nucleos  : 6 fisicos / 12 logicos
+python   : CPython 3.14.4
+entrada  : N = 20.000.000
+protocolo: 3 execucoes por configuracao, bloco = 10000
+
+[verificacao] Crivo de Eratostenes em 0.68s
+              primos=1.270.607  maior=19999999  soma=12272577818052
+
+[sequencial] medindo...
+             execucoes: ['133.88s', '133.46s', '131.30s']
+             mediana  :  133.46s (2m13.5s)   resultado CONFERE
+
+[processos W=2] medindo...
+                 execucoes: ['86.35s', '69.47s', '73.12s']
+                 mediana  :   73.12s (1m13.1s)   resultado CONFERE
+                 speedup  : 1.83x   teto Amdahl(p=0.97) = 1.94x
+
+[processos W=4] medindo...
+                 execucoes: ['38.36s', '44.14s', '46.48s']
+                 mediana  :   44.14s   resultado CONFERE
+                 speedup  : 3.02x   teto Amdahl(p=0.97) = 3.67x
+
+[processos W=8] medindo...
+                 execucoes: ['30.54s', '29.54s', '29.37s']
+                 mediana  :   29.54s   resultado CONFERE
+                 speedup  : 4.52x   teto Amdahl(p=0.97) = 6.61x
+
+[threads T=4] medindo...
+                execucoes: ['146.61s', '144.95s', '147.44s']
+                mediana  :  146.61s (2m26.6s)   speedup = 0.91x   resultado CONFERE
+
+==============================================================================
+RESUMO
+==============================================================================
+modo          W     mediana   speedup   efic.   Amdahl  p medido   ok
+------------------------------------------------------------------------------
+sequencial    1     133.46s     1.00x    1.00        -         -  sim
+processos     2      73.12s     1.83x    0.91    1.94x     0.904  sim
+processos     4      44.14s     3.02x    0.76    3.67x     0.892  sim
+processos     8      29.54s     4.52x    0.56    6.61x     0.890  sim
+threads       4     146.61s     0.91x    0.23        -         -  sim
+------------------------------------------------------------------------------
+Todas as versoes produziram o mesmo resultado da verificacao independente: SIM
+
+Resultados gravados em C:\wks\projetofabio\resultados\resultados.json
