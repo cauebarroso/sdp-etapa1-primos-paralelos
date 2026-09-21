@@ -130,7 +130,10 @@ scripts/
 
 docs/
   Ficha-Etapa1-preenchida.md   a ficha da oficina, respondida
-  Relatorio-Etapa1.md          o relatorio tecnico (ate 6 paginas)
+  Relatorio-Etapa1.md          o relatorio tecnico (fonte)
+  Relatorio-Etapa1.html        o mesmo relatorio, formatado para impressao
+  Relatorio-Etapa1.pdf         A ENTREGA: 6 paginas, pronto para o ambiente virtual
+  Provisionamento-Console.md   passo a passo da AWS pelo console, sem CLI
   Roteiro-Apresentacao.md      roteiro dos 10 minutos + preparo da arguicao
 
 resultados/
@@ -142,6 +145,10 @@ resultados/
 ---
 
 ## O caminho completo na nuvem
+
+Os scripts abaixo usam o **AWS CLI**. Se ele nao estiver instalado, o guia
+[`docs/Provisionamento-Console.md`](docs/Provisionamento-Console.md) faz o mesmo pelo
+console web, sem instalar nada.
 
 ```bash
 # 1. provisiona (descobre o IP da equipe e restringe a porta 22 a ele)
