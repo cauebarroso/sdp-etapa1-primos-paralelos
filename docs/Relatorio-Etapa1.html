@@ -370,13 +370,7 @@ def trabalhador(fila, contagem, maior, soma, trava, usar_trava):
   resultado de toda execução é conferido contra o crivo <strong>antes</strong> de o tempo ser
   aceito: tempo bom com resultado errado não conta.</p>
 
-  <div class="nota"><p><strong>Higiene da medição.</strong> Todas as execuções foram feitas com a
-  máquina ociosa, e isso não é detalhe. Repetindo a bateria sob carga de fundo, o speedup com 2
-  processos caiu de <strong>1,93× para 1,27×</strong> (−34 %), enquanto o tempo sequencial variou
-  menos de 1 %. O efeito é assimétrico por construção: a versão sequencial ocupa <strong>um</strong>
-  núcleo e convive bem com outra carga, enquanto a paralela disputa <strong>todos</strong>. Carga
-  de fundo infla, portanto, só o <strong>denominador</strong> do speedup — e uma medição feita sem
-  esse cuidado subestima o ganho sem dar nenhum sinal de que algo está errado.</p></div>
+  <p>Todas as execuções foram feitas com a máquina ociosa, sem outra carga concorrente.</p>
 
   <p>Ambiente: Windows 11, AMD Ryzen, <strong>6 núcleos físicos</strong> / 12 lógicos, CPython
   3.14.4, N = 20.000.000, blocos de 10.000. Verificação: 1.270.607 primos, maior 19.999.999, soma

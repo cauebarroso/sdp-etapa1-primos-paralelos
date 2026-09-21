@@ -193,13 +193,7 @@ reportada pela **mediana**, cronometrada com `time.perf_counter()`. O resultado 
 execução é conferido contra o crivo **antes** de o tempo ser aceito: tempo bom com
 resultado errado não conta.
 
-**Higiene da medição.** Todas as execuções foram feitas com a máquina ociosa, e isso não é
-detalhe. Repetindo a bateria sob carga de fundo, o speedup com 2 processos caiu de
-**1,93× para 1,27×** (−34 %), enquanto o tempo sequencial variou menos de 1 %. O efeito é
-assimétrico por construção: a versão sequencial ocupa **um** núcleo e convive bem com
-outra carga, enquanto a paralela disputa **todos**. Carga de fundo infla, portanto, só o
-**denominador** do speedup — e uma medição feita sem esse cuidado subestima o ganho sem
-dar nenhum sinal de que algo está errado.
+Todas as execuções foram feitas com a máquina ociosa, sem outra carga concorrente.
 
 Ambiente: Windows 11, AMD Ryzen, **6 núcleos físicos** / 12 lógicos, CPython 3.14.4,
 N = 20.000.000, blocos de 10.000. Verificação: 1.270.607 primos, maior 19.999.999, soma
