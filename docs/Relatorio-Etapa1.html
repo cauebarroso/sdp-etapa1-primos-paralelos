@@ -1,0 +1,568 @@
+<title>Contagem Paralela de Primos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --ink:#16202b; --ink-soft:#55697c; --ink-faint:#8395a5;
+    --paper:#ffffff; --tint:#f5f8fa; --rule:#dbe3ea; --rule-strong:#b9c7d3;
+    --accent:#0f5c8c; --accent-soft:#e7f0f7; --good:#0f6b46;
+    --serif:"Source Serif 4",Charter,Georgia,"Times New Roman",serif;
+    --mono:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+  }
+  :root:not([data-theme="light"]){ }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#e6edf3; --ink-soft:#a3b4c2; --ink-faint:#7d8f9e;
+      --paper:#11171d; --tint:#18212a; --rule:#2a3742; --rule-strong:#3d4d5a;
+      --accent:#6fb4e0; --accent-soft:#16283a; --good:#57c193;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#e6edf3; --ink-soft:#a3b4c2; --ink-faint:#7d8f9e;
+    --paper:#11171d; --tint:#18212a; --rule:#2a3742; --rule-strong:#3d4d5a;
+    --accent:#6fb4e0; --accent-soft:#16283a; --good:#57c193;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--serif); font-size:16px; line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .folha{max-width:44rem; margin:0 auto; padding:40px 20px 72px;}
+
+  /* ---------------------------------------------------- cabecalho */
+  header{border-bottom:2.5px solid var(--ink); padding-bottom:14px; margin-bottom:26px;}
+  .eyebrow{
+    font-family:var(--mono); font-size:.66rem; font-weight:600;
+    letter-spacing:.14em; text-transform:uppercase; color:var(--accent);
+    margin:0 0 10px;
+  }
+  h1{
+    font-size:1.72rem; line-height:1.18; font-weight:700; margin:0 0 4px;
+    letter-spacing:-.012em; text-wrap:balance;
+  }
+  .sub{font-size:1.06rem; color:var(--ink-soft); margin:0 0 16px; font-style:italic;}
+  .meta{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:4px 22px; font-family:var(--mono); font-size:.7rem; line-height:1.5;
+    color:var(--ink-soft);
+  }
+  .meta b{color:var(--ink); font-weight:600;}
+
+  /* ------------------------------------------------------ titulos */
+  h2{
+    font-size:1.12rem; font-weight:700; margin:30px 0 10px; letter-spacing:-.008em;
+    padding-bottom:5px; border-bottom:1px solid var(--rule); break-after:avoid;
+  }
+  h2 .n{font-family:var(--mono); font-size:.78rem; color:var(--accent); margin-right:.5em; font-weight:600;}
+  h3{font-size:.92rem; font-weight:700; margin:20px 0 7px; color:var(--ink); break-after:avoid;}
+  p{margin:0 0 11px;}
+  strong{font-weight:700;}
+  code{font-family:var(--mono); font-size:.84em; background:var(--tint); padding:.1em .34em; border-radius:3px;}
+
+  /* ------------------------------------------------------ tabelas */
+  .rolante{overflow-x:auto; margin:0 0 14px;}
+  table{
+    width:100%; border-collapse:collapse; font-size:.8rem;
+    font-variant-numeric:tabular-nums; break-inside:avoid;
+  }
+  th,td{padding:5px 9px; text-align:right; border-bottom:1px solid var(--rule);}
+  th:first-child,td:first-child{text-align:left;}
+  thead th{
+    font-family:var(--mono); font-size:.62rem; font-weight:600; letter-spacing:.07em;
+    text-transform:uppercase; color:var(--ink-soft);
+    border-bottom:1.5px solid var(--rule-strong); white-space:nowrap;
+  }
+  tbody tr:last-child td{border-bottom:1.5px solid var(--rule-strong);}
+  td.num{font-family:var(--mono); font-size:.76rem;}
+  .destaque td{background:var(--accent-soft);}
+  .ok{color:var(--good); font-weight:600;}
+  table.chave td:first-child{color:var(--ink-soft); width:34%;}
+
+  /* -------------------------------------------------------- codigo */
+  pre{
+    font-family:var(--mono); font-size:.7rem; line-height:1.5;
+    background:var(--tint); border-left:2.5px solid var(--accent);
+    padding:11px 13px; overflow-x:auto; margin:0 0 13px; break-inside:avoid;
+  }
+  pre .c{color:var(--ink-faint);}
+
+  /* --------------------------------------------------- destaque/box */
+  .nota{
+    background:var(--tint); border-left:2.5px solid var(--rule-strong);
+    padding:10px 14px; margin:0 0 13px; font-size:.88rem; break-inside:avoid;
+  }
+  .nota p:last-child{margin-bottom:0;}
+
+  /* ------------------------------------------------------- grafico */
+  .grafico{margin:0 0 16px; break-inside:avoid;}
+  .barra-linha{display:grid; grid-template-columns:2.6rem 1fr 3.4rem; align-items:center; gap:9px; margin-bottom:6px;}
+  .barra-rot{font-family:var(--mono); font-size:.68rem; color:var(--ink-soft); text-align:right;}
+  .trilho{position:relative; height:17px; background:var(--tint); border-radius:2px;}
+  .preenche{position:absolute; inset:0 auto 0 0; background:var(--accent); border-radius:2px;}
+  .teto{position:absolute; top:-2px; bottom:-2px; width:2px; background:var(--ink); opacity:.55;}
+  .barra-val{font-family:var(--mono); font-size:.7rem; font-weight:600;}
+  .legenda{font-family:var(--mono); font-size:.62rem; color:var(--ink-soft); margin-top:7px; display:flex; gap:16px; flex-wrap:wrap;}
+  .amostra{display:inline-block; width:16px; height:8px; background:var(--accent); vertical-align:middle; margin-right:5px; border-radius:1px;}
+  .amostra.linha{width:2px; height:11px; background:var(--ink); opacity:.55;}
+  .eixo{display:grid; grid-template-columns:2.6rem 1fr 3.4rem; gap:9px; font-family:var(--mono); font-size:.6rem; color:var(--ink-faint);}
+  .eixo-marcas{display:flex; justify-content:space-between;}
+
+  ul{margin:0 0 12px; padding-left:1.1rem;}
+  li{margin-bottom:5px;}
+
+  footer{
+    margin-top:30px; padding-top:12px; border-top:1px solid var(--rule);
+    font-size:.76rem; color:var(--ink-soft);
+  }
+
+  /* -------------------------------------------------------- IMPRESSAO */
+  @page{size:A4; margin:16mm 15mm;}
+  @media print{
+    :root{
+      --ink:#000; --ink-soft:#3c4a56; --ink-faint:#6b7883;
+      --paper:#fff; --tint:#f2f5f7; --rule:#c8d2da; --rule-strong:#95a3ae;
+      --accent:#0d4d76; --accent-soft:#e9f1f7; --good:#0a5636;
+    }
+    body{font-size:9.6pt; line-height:1.42;}
+    .folha{max-width:none; padding:0;}
+    .aviso-tela{display:none !important;}
+    h1{font-size:16.5pt;} .sub{font-size:10.5pt;}
+    h2{font-size:11.2pt; margin:14pt 0 5pt;}
+    h3{font-size:9.6pt; margin:9pt 0 3pt;}
+    p{margin:0 0 5.5pt;}
+    table{font-size:8pt;} th,td{padding:2.6pt 5pt;}
+    thead th{font-size:6.4pt;}
+    td.num{font-size:7.6pt;}
+    pre{font-size:7pt; padding:6pt 8pt; margin:0 0 7pt;}
+    .nota{padding:6pt 9pt; margin:0 0 7pt; font-size:8.6pt;}
+    .meta{font-size:7.4pt;}
+    .rolante{overflow:visible;}
+    h2,h3{break-after:avoid;}
+    table,pre,.nota,.grafico{break-inside:avoid;}
+    footer{margin-top:12pt; padding-top:6pt; font-size:7.6pt;}
+    a{color:inherit; text-decoration:none;}
+  }
+  .aviso-tela{
+    background:var(--accent-soft); border:1px solid var(--accent);
+    border-radius:5px; padding:9px 13px; margin:0 0 22px;
+    font-family:var(--mono); font-size:.68rem; line-height:1.55; color:var(--ink);
+  }
+  @media (max-width:520px){
+    body{font-size:15px;} .folha{padding:26px 16px 52px;}
+    h1{font-size:1.45rem;}
+    .barra-linha,.eixo{grid-template-columns:2.2rem 1fr 3rem; gap:7px;}
+  }
+</style>
+
+<div class="folha">
+
+  <div class="aviso-tela">
+    Para gerar o PDF da entrega: <b>Ctrl+P</b> → Destino “Salvar como PDF” → margens
+    “Padrão” → ative <b>“Gráficos de segundo plano”</b>. Esta caixa não sai na impressão.
+  </div>
+
+  <header>
+    <p class="eyebrow">070080 · Sistemas Distribuídos e Paralelos · Etapa 1</p>
+    <h1>Contagem paralela e verificável de números primos</h1>
+    <p class="sub">Medição do ganho de processos sobre threads em trabalho limitado por processador</p>
+    <div class="meta">
+      <div><b>Equipe</b><br>Cauê Barroso · 24070033<br>César Ribeiro · 24070011<br>Augusto Pereira · 24070005</div>
+      <div><b>Turma</b><br>CC6MA<br><b>Data</b><br>22/09</div>
+      <div><b>Professor</b><br>Fábio Rocha de Araújo<br><b>Repositório</b><br>(link no ambiente virtual)</div>
+    </div>
+  </header>
+
+  <!-- ============================================================ 1 -->
+  <h2><span class="n">1</span>O problema</h2>
+
+  <p>O programa conta os primos do intervalo <code>[2, N]</code> e devolve três valores —
+  <strong>contagem</strong>, <strong>maior primo</strong> e <strong>soma dos primos</strong> —
+  com <code>N = 20.000.000</code>.</p>
+
+  <p><strong>Por que se divide.</strong> Decidir se um número é primo não usa o resultado de
+  nenhum outro: não há dependência de dados nem de ordem. A unidade de trabalho é um
+  <strong>bloco de 10.000 inteiros consecutivos</strong>; para N = 20 milhões são
+  <strong>2.000 blocos independentes</strong>.</p>
+
+  <p><strong>Volume.</strong> 20 milhões de candidatos, dos quais 1.270.607 são primos. O teste
+  é <strong>divisão sucessiva em Python puro</strong> — escolha deliberada: queríamos trabalho
+  <em>de processador</em>, e não uma chamada a biblioteca em C que liberasse a GIL e
+  embaralhasse a comparação entre threads e processos. A versão sequencial leva
+  <strong>128,62 s</strong> — minutos, não segundos.</p>
+
+  <p><strong>Verificação, em três camadas.</strong> (1) <strong>Assinatura de três campos</strong>:
+  acertar a contagem por acaso é plausível; acertar os três trocando um primo por outro, não.
+  (2) <strong>Algoritmo independente</strong>: um Crivo de Eratóstenes calcula a mesma resposta
+  por outro caminho em 0,65 s — conferir apenas sequencial contra paralelo não pegaria um erro
+  no teste de primalidade, que é comum aos dois. (3) <strong>Valor externo</strong>:
+  π(20.000.000) = 1.270.607 confere com a literatura. Além disso, a versão paralela é repetida
+  cinco vezes com a mesma entrada e precisa devolver o mesmo trio (§3.4).</p>
+
+  <!-- ============================================================ 2 -->
+  <h2><span class="n">2</span>Estratégia de paralelização</h2>
+
+  <p><strong>Paralelismo de dados:</strong> todos os trabalhadores executam a mesma operação
+  sobre fatias diferentes do mesmo domínio. Não há etapas distintas que virassem tarefas.</p>
+
+  <p><strong>Processos, não threads.</strong> O laço quente é divisão inteira em Python puro:
+  <strong>não há espera</strong> — nem disco, nem rede, nem banco. O trabalho é
+  <strong>limitado por processador</strong>. Em CPython a GIL permite que só uma thread execute
+  bytecode por vez, então threads não somam tempo de CPU. Não tomamos isso como artigo de fé:
+  medimos as duas versões, com o mesmo algoritmo e a mesma entrada (§6.4). Processos resolvem
+  porque cada um tem seu interpretador e sua GIL, e é escalonado num núcleo de verdade.</p>
+
+  <p><strong>Divisão do trabalho: fila com balanceamento dinâmico.</strong> Os 2.000 blocos vão
+  para uma <code>multiprocessing.Queue</code> e cada trabalhador puxa o próximo ao terminar o
+  anterior. Isso importa porque <strong>blocos de tamanho igual não têm custo igual</strong>:
+  testar um número perto de 20 milhões percorre divisores até ~4.472, contra poucas dezenas
+  perto de zero — o fim do intervalo é muito mais caro que o começo. Com quatro fatias
+  estáticas para quatro processos, quem recebesse a última seguraria os outros três ociosos no
+  fim. Com <strong>T ≫ W</strong> (2.000 blocos para até 8 trabalhadores), a fila reequilibra
+  sozinha, sem que o programa precise estimar o custo de cada bloco.</p>
+
+  <!-- ============================================================ 3 -->
+  <h2><span class="n">3</span>A seção crítica e a primitiva que a protege</h2>
+
+  <p><strong>Estado compartilhado:</strong> três inteiros de 64 bits em memória compartilhada
+  entre processos (<code>multiprocessing.RawValue('q')</code>) — <code>contagem</code>,
+  <code>maior</code> e <code>soma</code>. Os W trabalhadores escrevem nos três.</p>
+
+  <p><strong>A seção crítica</strong> é a fusão do parcial local no global, e nada além disso
+  (<code>src/paralelo_processos.py</code>):</p>
+
+<pre>def _dobrar_no_estado(contagem, maior, soma, local):
+    contagem.value += local.contagem              <span class="c"># leitura-modificação-escrita</span>
+    if local.maior_primo &gt; maior.value:           <span class="c"># leitura-modificação-escrita</span>
+        maior.value = local.maior_primo
+    soma.value += local.soma                      <span class="c"># leitura-modificação-escrita</span>
+
+def trabalhador(fila, contagem, maior, soma, trava, usar_trava):
+    while True:
+        tarefa = fila.get()
+        if tarefa is None:
+            return
+        inicio, fim = tarefa
+        local = resumo_intervalo(inicio, fim)     <span class="c"># PESADO — fora da trava</span>
+        with trava:                               <span class="c"># seção crítica</span>
+            _dobrar_no_estado(contagem, maior, soma, local)</pre>
+
+  <p>Nenhuma das três linhas é atômica: cada uma lê, calcula e escreve de volta. Dois processos
+  executando isso ao mesmo tempo podem ler o mesmo valor antigo, e a escrita de um apaga a do
+  outro — a soma de um bloco inteiro se perde.</p>
+
+  <p><strong>O que está fora da trava importa tanto quanto o que está dentro.</strong> A chamada
+  <code>resumo_intervalo</code>, que consome mais de 99 % do tempo, fica fora. Uma versão com a
+  trava em volta do laço seria igualmente correta, mas serializaria o programa — um processo por
+  vez, speedup ≈ 1. Aqui a trava protege três somas de microssegundos, adquiridas 2.000 vezes na
+  execução inteira.</p>
+
+  <p><strong>Por que Lock, e não semáforo ou monitor.</strong> O que o problema pede é
+  <strong>exclusão mútua pura</strong>. Semáforo serve para limitar um recurso
+  <strong>contável</strong> — não temos contagem a limitar. Monitor serve quando há
+  <strong>condição de espera</strong> a sinalizar — nenhum trabalhador espera por estado de
+  outro. O mutex é a primitiva mínima que resolve, e a mínima é a certa.</p>
+
+  <h3>3.4 Prova de que não há condição de corrida</h3>
+
+  <p><strong>Teste 1 — estabilidade do resultado real</strong> (<code>verificar.py</code>): a
+  versão paralela roda cinco vezes com a mesma entrada; os três campos vêm idênticos nas cinco,
+  e idênticos ao sequencial e ao crivo. Perder atualizações é erro
+  <strong>não determinístico</strong> — se houvesse corrida, a contagem variaria entre
+  execuções.</p>
+
+  <p><strong>Teste 2 — o contraste</strong> (<code>demo_corrida.py</code>): o teste 1 mostra que
+  está certo, mas não que é <em>a trava</em> que faz estar certo. Seis processos incrementam
+  100.000 vezes cada um o mesmo contador; o correto é 600.000.</p>
+
+  <div class="rolante"><table>
+    <thead><tr><th>Execução</th><th>Sem trava</th><th>Perdidos</th><th>Com trava</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td class="num">373.508</td><td class="num">226.492</td><td class="num ok">600.000</td></tr>
+      <tr><td>2</td><td class="num">275.580</td><td class="num">324.420</td><td class="num ok">600.000</td></tr>
+      <tr><td>3</td><td class="num">272.174</td><td class="num">327.826</td><td class="num ok">600.000</td></tr>
+    </tbody>
+  </table></div>
+
+  <p>Sem a trava perde-se ~45 % dos incrementos, e <strong>o número muda a cada execução</strong>
+  — numa segunda bateria deu 369.254 / 352.851 / 337.311, seis valores errados e todos
+  diferentes, enquanto a coluna com trava deu 600.000 nas seis. O resultado estável vem da
+  primitiva, não de sorte de escalonamento.</p>
+
+  <h3>3.5 Troca de mensagem e carimbo lógico</h3>
+
+  <p>A aplicação <strong>tem</strong> troca de mensagem: o coordenador envia blocos aos
+  trabalhadores por uma fila e recebe registros de evento por outra. Como processos separados não
+  compartilham relógio confiável, a ordem vem do <strong>carimbo lógico de Lamport</strong>
+  (<code>src/lamport.py</code>). Regras: evento local <code>L+1</code>; envio <code>L+1</code>, e
+  a mensagem viaja com <code>L</code>; recebimento <code>max(L, L_msg)+1</code>. Cada registro
+  contém <strong>quem</strong> (<code>C0</code>, <code>T1</code>…<code>Tn</code>),
+  <strong>o quê</strong> (<code>ENVIA_BLOCO</code>, <code>RECEBE_BLOCO</code>,
+  <code>CALCULA</code>, <code>ENTRA_SC</code>, <code>SAI_SC</code>), <strong>o carimbo</strong> e
+  <strong>sobre o quê</strong> (o bloco <code>[início,fim)</code> ou <code>estado_global</code>).
+  O log mostra a causalidade preservada — o coordenador envia com carimbo 1 e quem recebe
+  registra 2, nunca o contrário.</p>
+
+  <div class="nota"><p><strong>Limite reconhecido:</strong> carimbos de Lamport dão ordem
+  <strong>parcial</strong>. Eventos concorrentes podem receber o mesmo carimbo, e carimbo maior
+  não implica dependência causal; detectar concorrência exigiria relógios vetoriais.</p></div>
+
+  <!-- ============================================================ 4 -->
+  <h2><span class="n">4</span>Recursos provisionados na nuvem</h2>
+
+  <div class="rolante"><table class="chave">
+    <tbody>
+      <tr><td>Região / zonas</td><td style="text-align:left"><code>sa-east-1</code> (São Paulo), <strong>uma</strong> zona (<code>sa-east-1a</code>)</td></tr>
+      <tr><td>Instância</td><td style="text-align:left">1 × <code>c5.2xlarge</code> — 8 vCPU (4 núcleos físicos), 16 GiB</td></tr>
+      <tr><td>Armazenamento</td><td style="text-align:left">EBS <strong>gp3, 20 GB</strong> (disco raiz)</td></tr>
+      <tr><td>Portas de entrada</td><td style="text-align:left"><strong>22/tcp</strong> ← <code>&lt;IP da equipe&gt;/32</code> · <strong>8000/tcp</strong> ← <code>0.0.0.0/0</code></td></tr>
+      <tr><td>Ciclo de vida</td><td style="text-align:left"><strong>Criada por execução</strong></td></tr>
+    </tbody>
+  </table></div>
+
+  <p><strong>Região e SLA.</strong> Com <strong>instância isolada em uma zona</strong>, o
+  compromisso que passa a valer é o de <strong>99,5 %</strong> — <strong>216 minutos</strong> de
+  indisponibilidade admitida em 30 dias. Os <strong>99,99 %</strong> (4,3 minutos) exigiriam
+  instâncias em <strong>duas ou mais zonas</strong>. Aceitamos 99,5 % conscientemente: a carga é
+  um <strong>lote</strong> de poucos minutos, não um serviço contínuo; se a instância cair,
+  repete-se a execução. E há razão de método — a medição exige sequencial e paralelo
+  <strong>na mesma máquina</strong>, então duas zonas significariam duas instâncias, o dobro do
+  custo e nenhum ganho de medição.</p>
+
+  <p><strong>Família e tamanho.</strong> A família <code>c</code> é otimizada para CPU, que é o
+  nosso gargalo. Descartamos a família <code>t</code> (burstable) por motivo concreto: ela
+  entrega créditos de CPU que se esgotam, e uma medição de minutos terminaria com o desempenho
+  caindo no meio — o tempo medido não seria o do algoritmo. Memória não é gargalo: o programa não
+  guarda a lista de primos, só acumula três inteiros.</p>
+
+  <p><strong>Entrada e saída.</strong> Não há arquivo de entrada — a entrada é o parâmetro
+  <code>N</code>, e os blocos são gerados em memória. A saída são <code>resultados.json</code>
+  (~4 KB), <code>medicao_console.txt</code> (~2 KB) e <code>eventos.log</code> (poucos KB), no
+  volume EBS. <strong>Não usamos S3</strong>: com dados dessa ordem ele só acrescentaria latência
+  de rede dentro do laço de medição, permissões de IAM e mais um ponto de falha.</p>
+
+  <p><strong>Portas.</strong> <strong>Por que a porta administrativa não está aberta para</strong>
+  <code>0.0.0.0/0</code>: SSH exposto à internet recebe varredura automatizada e força bruta
+  continuamente; com a porta administrativa pública, qualquer credencial fraca ou vazada deixa de
+  ser incidente contido e passa a ser <strong>controle total da instância</strong>. A superfície
+  de administração só precisa ser alcançável de onde a equipe administra — daí o
+  <code>/32</code>. Isso não é só intenção documentada: <code>provisionar_aws.sh</code>
+  <strong>aborta</strong> se não descobrir o IP da equipe, em vez de cair para
+  <code>0.0.0.0/0</code>, e ao final <strong>confere as regras e falha</strong> se achar
+  <code>0.0.0.0/0</code> na porta 22. A 8000 é aberta por ser a <strong>porta do serviço</strong>
+  — uma página somente leitura, sem autenticação a proteger e sem rota que altere estado (por
+  isso também HTTP simples: não há segredo em trânsito).</p>
+
+  <p><strong>Ciclo de vida.</strong> Criada por execução (<code>provisionar</code> →
+  <code>executar</code> → <code>destruir</code>). A carga dura minutos; manter a máquina ligada
+  fora dessa janela é custo sem uso. Como não há estado a preservar entre execuções, recriar não
+  custa nada além da inicialização.</p>
+
+  <!-- ============================================================ 5 -->
+  <h2><span class="n">5</span>Medição</h2>
+
+  <p><strong>Protocolo.</strong> As duas versões rodam <strong>na mesma máquina</strong>, com
+  <strong>a mesma entrada</strong>, na <strong>mesma invocação</strong> de
+  <code>benchmark.py</code>. Cada configuração é executada <strong>três vezes</strong> e
+  reportada pela <strong>mediana</strong>, cronometrada com <code>time.perf_counter()</code>. O
+  resultado de toda execução é conferido contra o crivo <strong>antes</strong> de o tempo ser
+  aceito: tempo bom com resultado errado não conta.</p>
+
+  <div class="nota"><p><strong>Higiene da medição.</strong> Todas as execuções foram feitas com a
+  máquina ociosa, e isso não é detalhe. Repetindo a bateria sob carga de fundo, o speedup com 2
+  processos caiu de <strong>1,93× para 1,27×</strong> (−34 %), enquanto o tempo sequencial variou
+  menos de 1 %. O efeito é assimétrico por construção: a versão sequencial ocupa <strong>um</strong>
+  núcleo e convive bem com outra carga, enquanto a paralela disputa <strong>todos</strong>. Carga
+  de fundo infla, portanto, só o <strong>denominador</strong> do speedup — e uma medição feita sem
+  esse cuidado subestima o ganho sem dar nenhum sinal de que algo está errado.</p></div>
+
+  <p>Ambiente: Windows 11, AMD Ryzen, <strong>6 núcleos físicos</strong> / 12 lógicos, CPython
+  3.14.4, N = 20.000.000, blocos de 10.000. Verificação: 1.270.607 primos, maior 19.999.999, soma
+  12.272.577.818.052 — <strong>as 15 execuções produziram exatamente esse trio</strong>.</p>
+
+  <div class="rolante"><table>
+    <thead><tr>
+      <th>Versão</th><th>W</th><th>Execuções (s)</th><th>Mediana</th>
+      <th>Speedup</th><th>Efic.</th><th>Teto Amdahl</th><th>p medido</th>
+    </tr></thead>
+    <tbody>
+      <tr><td>sequencial</td><td class="num">1</td><td class="num">128,62 · 128,14 · 131,81</td><td class="num">128,62 s</td><td class="num">1,00×</td><td class="num">1,00</td><td class="num">—</td><td class="num">—</td></tr>
+      <tr><td>processos</td><td class="num">2</td><td class="num">66,77 · 67,75 · 66,55</td><td class="num">66,77 s</td><td class="num">1,93×</td><td class="num">0,96</td><td class="num">1,94×</td><td class="num">0,962</td></tr>
+      <tr><td>processos</td><td class="num">4</td><td class="num">34,34 · 34,47 · 34,56</td><td class="num">34,47 s</td><td class="num">3,73×</td><td class="num">0,93</td><td class="num">3,67×</td><td class="num">0,976</td></tr>
+      <tr class="destaque"><td><strong>processos</strong></td><td class="num">6</td><td class="num">25,40 · 25,87 · 25,74</td><td class="num"><strong>25,74 s</strong></td><td class="num"><strong>5,00×</strong></td><td class="num">0,83</td><td class="num">5,22×</td><td class="num">0,960</td></tr>
+      <tr><td>processos</td><td class="num">8</td><td class="num">25,29 · 26,92 · 26,73</td><td class="num">26,73 s</td><td class="num">4,81×</td><td class="num">0,60</td><td class="num">6,61×</td><td class="num">0,905</td></tr>
+      <tr><td>threads</td><td class="num">4</td><td class="num">140,53 · 139,13 · 146,85</td><td class="num">140,53 s</td><td class="num">0,92×</td><td class="num">0,23</td><td class="num">—</td><td class="num">—</td></tr>
+    </tbody>
+  </table></div>
+
+  <p><strong>Melhor resultado: 128,6 s → 25,7 s, speedup de 5,00× com W = 6.</strong> E repare
+  no que acontece depois: <strong>W = 8 é mais lento que W = 6</strong> (4,81× contra 5,00×). A
+  máquina tem seis núcleos físicos, e o sétimo e o oitavo trabalhadores não têm onde rodar.</p>
+
+  <p>O protocolo é reprodutível: repetida a medição em outra máquina (a instância EC2, via
+  <code>scripts/executar_na_instancia.sh</code>), as tabelas são regeradas por
+  <code>python src/tabelas.py</code> a partir do JSON que o próprio <code>benchmark.py</code>
+  grava.</p>
+
+  <!-- ============================================================ 6 -->
+  <h2><span class="n">6</span>Análise: o medido contra o previsto</h2>
+
+  <h3>6.1 O medido acompanha o teto — até acabarem os núcleos físicos</h3>
+
+  <div class="grafico">
+    <div class="barra-linha">
+      <span class="barra-rot">W = 2</span>
+      <span class="trilho"><span class="preenche" style="width:27.6%"></span><span class="teto" style="left:27.7%"></span></span>
+      <span class="barra-val">1,93×</span>
+    </div>
+    <div class="barra-linha">
+      <span class="barra-rot">W = 4</span>
+      <span class="trilho"><span class="preenche" style="width:53.3%"></span><span class="teto" style="left:52.4%"></span></span>
+      <span class="barra-val">3,73×</span>
+    </div>
+    <div class="barra-linha">
+      <span class="barra-rot">W = 6</span>
+      <span class="trilho"><span class="preenche" style="width:71.4%"></span><span class="teto" style="left:74.6%"></span></span>
+      <span class="barra-val">5,00×</span>
+    </div>
+    <div class="barra-linha">
+      <span class="barra-rot">W = 8</span>
+      <span class="trilho"><span class="preenche" style="width:68.7%"></span><span class="teto" style="left:94.4%"></span></span>
+      <span class="barra-val">4,81×</span>
+    </div>
+    <div class="eixo">
+      <span></span>
+      <span class="eixo-marcas"><span>0</span><span>1,75×</span><span>3,5×</span><span>5,25×</span><span>7×</span></span>
+      <span></span>
+    </div>
+    <div class="legenda">
+      <span><span class="amostra"></span>speedup medido</span>
+      <span><span class="amostra linha"></span>teto de Amdahl (p = 0,97)</span>
+    </div>
+  </div>
+
+  <div class="rolante"><table>
+    <thead><tr><th>W</th><th>Previsto (p = 0,97)</th><th>Medido</th><th>Fração do teto</th><th>Eficiência</th></tr></thead>
+    <tbody>
+      <tr><td class="num">2</td><td class="num">1,94×</td><td class="num">1,93×</td><td class="num"><strong>99 %</strong></td><td class="num">0,96</td></tr>
+      <tr><td class="num">4</td><td class="num">3,67×</td><td class="num">3,73×</td><td class="num"><strong>102 %</strong></td><td class="num">0,93</td></tr>
+      <tr><td class="num">6</td><td class="num">5,22×</td><td class="num">5,00×</td><td class="num"><strong>96 %</strong></td><td class="num">0,83</td></tr>
+      <tr><td class="num">8</td><td class="num">6,61×</td><td class="num">4,81×</td><td class="num"><strong>73 %</strong></td><td class="num">0,60</td></tr>
+    </tbody>
+  </table></div>
+
+  <p>A tabela se parte em duas metades. <strong>Até W = 6 — que é exatamente o número de
+  núcleos físicos — o medido acompanha o previsto de perto</strong>, entre 96 % e 102 %. De
+  W = 6 para W = 8 a coisa inverte: a fração do teto cai para 73 % e, mais do que isso,
+  <strong>o speedup diminui em valor absoluto</strong> (5,00× → 4,81×). Acrescentar dois
+  trabalhadores deixou o programa mais lento.</p>
+
+  <p>Esse é o achado central da medição, e ele não precisa de interpretação: o ganho é limitado
+  pelo número de <strong>núcleos físicos</strong>, e pedir mais paralelismo do que a máquina tem
+  não é neutro — custa.</p>
+
+  <h3>6.2 A estimativa de p estava certa</h3>
+
+  <p>A métrica de <strong>Karp-Flatt</strong> inverte a pergunta: parte do speedup
+  <em>medido</em> e calcula qual fração paralelizável o explicaria.</p>
+
+  <div class="rolante"><table>
+    <thead><tr><th>W</th><th>Speedup medido</th><th><code>p</code> medido</th></tr></thead>
+    <tbody>
+      <tr><td class="num">2</td><td class="num">1,93×</td><td class="num">0,962</td></tr>
+      <tr><td class="num">4</td><td class="num">3,73×</td><td class="num"><strong>0,976</strong></td></tr>
+      <tr><td class="num">6</td><td class="num">5,00×</td><td class="num">0,960</td></tr>
+      <tr><td class="num">8</td><td class="num">4,81×</td><td class="num">0,905</td></tr>
+    </tbody>
+  </table></div>
+
+  <p>Até W = 6, o <code>p</code> medido fica entre <strong>0,96 e 0,98</strong> — em torno dos
+  0,97 que estimamos. A estimativa da equipe estava correta e, em W = 4, até ligeiramente
+  conservadora: é por isso que ali o medido (3,73×) <strong>passa</strong> o teto calculado com
+  0,97 (3,67×). Não é violação da lei de Amdahl; é sinal de que o <code>p</code> verdadeiro
+  naquele ponto é 0,976, e não 0,97.</p>
+
+  <p>A queda para 0,905 em W = 8 também não indica que o algoritmo mudou. O que mudou foi o
+  denominador do modelo: Amdahl supõe <code>n</code> unidades de execução
+  <strong>independentes</strong>, e a oitava não existe nesta máquina. O modelo, forçado a
+  explicar um speedup pior com um <code>n</code> maior, devolve a única resposta que pode — uma
+  fração serial maior.</p>
+
+  <h3>6.3 O que limitou o ganho</h3>
+
+  <p><strong>(a) Espera na seção crítica — descartada.</strong> A trava é adquirida 2.000 vezes
+  na execução inteira, e cada seção crítica são três somas de inteiros: num total de 34 s, menos
+  de 0,1 %. A seção crítica <strong>não</strong> é o gargalo — e é justamente esse o efeito de
+  tê-la mantido pequena. A eficiência de <strong>0,93 em W = 4</strong> confirma: quase nada se
+  perde em coordenação.</p>
+
+  <p><strong>(b) Custo fixo de criar processos e mover blocos — pequeno aqui, decisivo em volumes
+  menores.</strong> O <code>spawn</code> reinicia o interpretador em cada processo, e os blocos
+  são serializados pela fila. Esse custo é ~constante em segundos, então o que muda é o tamanho do
+  trabalho que o dilui. Com o mesmo código e o mesmo W = 4:</p>
+
+  <div class="rolante"><table>
+    <thead><tr><th>N</th><th>Tempo sequencial</th><th>Speedup com W = 4</th></tr></thead>
+    <tbody>
+      <tr><td class="num">1.000.000</td><td class="num">1,85 s</td><td class="num">2,44×</td></tr>
+      <tr><td class="num">20.000.000</td><td class="num">128,62 s</td><td class="num"><strong>3,73×</strong></td></tr>
+    </tbody>
+  </table></div>
+
+  <p>É por isso que a exigência de que o sequencial leve <em>minutos</em> não é burocracia: em
+  segundos, a medição mediria sobretudo o custo de partida, e concluiria que o programa escala mal
+  quando o que escala mal é o experimento.</p>
+
+  <p><strong>(c) Núcleos físicos — o limite dominante, e desta vez medido diretamente.</strong> A
+  eficiência cai de 0,96 (W = 2) para 0,93 (W = 4), 0,83 (W = 6) e 0,60 (W = 8). Até seis
+  trabalhadores a queda é suave — é o custo de coordenação crescendo devagar. De seis para oito
+  ela desaba, porque não há mais núcleo para ocupar: os dois trabalhadores extras passam a dividir
+  núcleos com os outros seis, e o SMT não compensa o que a troca de contexto custa. Daí o
+  <strong>W = 8 ser mais lento que W = 6</strong>.</p>
+
+  <p>Isso também mostra que <strong>comparar W = 8 com o teto de 6,61× é injusto com o
+  modelo</strong>: esse teto pressupõe oito unidades independentes, e há seis. O teto honesto para
+  esta máquina é Amdahl com n = 6 — <strong>5,22×</strong> —, e os 5,00× medidos em W = 6 são
+  <strong>96 %</strong> dele.</p>
+
+  <p><strong>(d) Frequência do processador — fator provável, não isolado.</strong> Com um núcleo
+  ativo o processador opera em turbo mais alto do que com todos carregados, o que penaliza o
+  speedup porque o denominador da conta (o tempo sequencial) é obtido na condição mais favorável.
+  <strong>Não isolamos esse efeito</strong> — exigiria fixar a frequência no firmware —, então
+  fica registrado como causa provável, e não como valor medido.</p>
+
+  <h3>6.4 Threads: a evidência que justifica a escolha</h3>
+
+  <p>Com quatro threads o programa levou <strong>140,53 s</strong> contra <strong>128,62 s</strong>
+  do sequencial: ficou <strong>12 segundos mais lento que sem paralelismo nenhum</strong> (0,92×).
+  É o previsto — a GIL permite só uma thread executando bytecode por vez, de modo que as quatro se
+  revezam em vez de somar tempo de processador, e ainda pagam troca de contexto e disputa pela
+  trava. O mesmo algoritmo, com processos, rende <strong>5,00×</strong>. É a diferença entre
+  afirmar e demonstrar: a escolha por processos não é preferência, é o que os números exigem.</p>
+
+  <!-- ============================================================ 7 -->
+  <h2><span class="n">7</span>Limites reconhecidos</h2>
+
+  <ul>
+    <li><strong>O ganho é limitado por núcleos físicos, não por vCPU</strong> — cada vCPU x86 é
+    uma <em>thread</em> de um núcleo, e duas threads do mesmo núcleo disputam as mesmas unidades
+    de execução.</li>
+    <li><strong>A medição vale para este volume</strong> — com N muito menor, o custo de partida
+    domina (2,44× em N = 1 milhão contra 3,73× em 20 milhões, mesmo W).</li>
+    <li><strong>Carimbos de Lamport dão ordem parcial</strong> — preservam causalidade, não
+    detectam concorrência; isso exigiria relógios vetoriais.</li>
+    <li><strong>O checksum usa 64 bits</strong> — a soma até 20 milhões (1,2 × 10¹³) cabe
+    folgada; acima de ~10⁹ seria preciso trocar o tipo do acumulador compartilhado.</li>
+  </ul>
+
+  <footer>
+    <strong>Uso de inteligência artificial.</strong> Este trabalho foi desenvolvido com auxílio do
+    Claude (Anthropic) na escrita do código e na redação deste relatório. As decisões de projeto
+    foram revisadas e validadas pela equipe, e todos os tempos apresentados são medições reais,
+    registradas em <code>resultados/resultados.json</code> e conferidas contra um algoritmo
+    independente.
+  </footer>
+
+</div>

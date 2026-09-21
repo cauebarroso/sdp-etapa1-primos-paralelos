@@ -7,42 +7,48 @@ python   : CPython 3.14.4
 entrada  : N = 20.000.000
 protocolo: 3 execucoes por configuracao, bloco = 10000
 
-[verificacao] Crivo de Eratostenes em 0.68s
+[verificacao] Crivo de Eratostenes em 0.65s
               primos=1.270.607  maior=19999999  soma=12272577818052
 
 [sequencial] medindo...
-             execucoes: ['133.88s', '133.46s', '131.30s']
-             mediana  :  133.46s (2m13.5s)   resultado CONFERE
+             execucoes: ['128.62s', '128.14s', '131.81s']
+             mediana  :  128.62s (2m08.6s)   resultado CONFERE
 
 [processos W=2] medindo...
-                 execucoes: ['86.35s', '69.47s', '73.12s']
-                 mediana  :   73.12s (1m13.1s)   resultado CONFERE
-                 speedup  : 1.83x   teto Amdahl(p=0.97) = 1.94x
+                 execucoes: ['66.77s', '67.75s', '66.55s']
+                 mediana  :   66.77s (1m06.8s)   resultado CONFERE
+                 speedup  : 1.93x   teto Amdahl(p=0.97) = 1.94x
 
 [processos W=4] medindo...
-                 execucoes: ['38.36s', '44.14s', '46.48s']
-                 mediana  :   44.14s   resultado CONFERE
-                 speedup  : 3.02x   teto Amdahl(p=0.97) = 3.67x
+                 execucoes: ['34.34s', '34.47s', '34.56s']
+                 mediana  :   34.47s   resultado CONFERE
+                 speedup  : 3.73x   teto Amdahl(p=0.97) = 3.67x
+
+[processos W=6] medindo...
+                 execucoes: ['25.40s', '25.87s', '25.74s']
+                 mediana  :   25.74s   resultado CONFERE
+                 speedup  : 5.00x   teto Amdahl(p=0.97) = 5.22x
 
 [processos W=8] medindo...
-                 execucoes: ['30.54s', '29.54s', '29.37s']
-                 mediana  :   29.54s   resultado CONFERE
-                 speedup  : 4.52x   teto Amdahl(p=0.97) = 6.61x
+                 execucoes: ['25.29s', '26.92s', '26.73s']
+                 mediana  :   26.73s   resultado CONFERE
+                 speedup  : 4.81x   teto Amdahl(p=0.97) = 6.61x
 
 [threads T=4] medindo...
-                execucoes: ['146.61s', '144.95s', '147.44s']
-                mediana  :  146.61s (2m26.6s)   speedup = 0.91x   resultado CONFERE
+                execucoes: ['140.53s', '139.13s', '146.85s']
+                mediana  :  140.53s (2m20.5s)   speedup = 0.92x   resultado CONFERE
 
 ==============================================================================
 RESUMO
 ==============================================================================
 modo          W     mediana   speedup   efic.   Amdahl  p medido   ok
 ------------------------------------------------------------------------------
-sequencial    1     133.46s     1.00x    1.00        -         -  sim
-processos     2      73.12s     1.83x    0.91    1.94x     0.904  sim
-processos     4      44.14s     3.02x    0.76    3.67x     0.892  sim
-processos     8      29.54s     4.52x    0.56    6.61x     0.890  sim
-threads       4     146.61s     0.91x    0.23        -         -  sim
+sequencial    1     128.62s     1.00x    1.00        -         -  sim
+processos     2      66.77s     1.93x    0.96    1.94x     0.962  sim
+processos     4      34.47s     3.73x    0.93    3.67x     0.976  sim
+processos     6      25.74s     5.00x    0.83    5.22x     0.960  sim
+processos     8      26.73s     4.81x    0.60    6.61x     0.905  sim
+threads       4     140.53s     0.92x    0.23        -         -  sim
 ------------------------------------------------------------------------------
 Todas as versoes produziram o mesmo resultado da verificacao independente: SIM
 

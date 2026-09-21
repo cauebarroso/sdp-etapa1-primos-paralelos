@@ -2,7 +2,8 @@
 ## Contagem paralela e verificável de números primos
 
 **070080 Sistemas Distribuídos e Paralelos** · Turma CC6MA · Prof. Fábio Rocha de Araújo
-**Equipe:** Cauê Barroso · Cesár Ribeiro · Augusto Pereira · **Data:** 22/09
+**Equipe:** Cauê Barroso (24070033) · César Ribeiro (24070011) · Augusto Pereira (24070005)
+**Data:** 22/09
 **Repositório:** *(link no ambiente virtual)*
 
 ---
@@ -19,12 +20,12 @@ inteiros consecutivos**; para N = 20 milhões são **2.000 blocos independentes*
 **Volume.** 20 milhões de candidatos, dos quais 1.270.607 são primos. O teste é **divisão
 sucessiva em Python puro** — escolha deliberada: queríamos trabalho *de processador*, e
 não uma chamada a biblioteca em C que liberasse a GIL e embaralhasse a comparação entre
-threads e processos. A versão sequencial leva **133,46 s** — minutos, não segundos.
+threads e processos. A versão sequencial leva **128,62 s** — minutos, não segundos.
 
 **Verificação, em três camadas.** (1) **Assinatura de três campos**: acertar a contagem
 por acaso é plausível; acertar os três trocando um primo por outro, não. (2) **Algoritmo
 independente**: um Crivo de Eratóstenes calcula a mesma resposta por outro caminho em
-0,68 s — conferir apenas sequencial contra paralelo não pegaria um erro no teste de
+0,65 s — conferir apenas sequencial contra paralelo não pegaria um erro no teste de
 primalidade, que é comum aos dois. (3) **Valor externo**: π(20.000.000) = 1.270.607
 confere com a literatura. Além disso, a versão paralela é repetida cinco vezes com a
 mesma entrada e precisa devolver o mesmo trio (§3.4).
@@ -192,19 +193,30 @@ reportada pela **mediana**, cronometrada com `time.perf_counter()`. O resultado 
 execução é conferido contra o crivo **antes** de o tempo ser aceito: tempo bom com
 resultado errado não conta.
 
+**Higiene da medição.** Todas as execuções foram feitas com a máquina ociosa, e isso não é
+detalhe. Repetindo a bateria sob carga de fundo, o speedup com 2 processos caiu de
+**1,93× para 1,27×** (−34 %), enquanto o tempo sequencial variou menos de 1 %. O efeito é
+assimétrico por construção: a versão sequencial ocupa **um** núcleo e convive bem com
+outra carga, enquanto a paralela disputa **todos**. Carga de fundo infla, portanto, só o
+**denominador** do speedup — e uma medição feita sem esse cuidado subestima o ganho sem
+dar nenhum sinal de que algo está errado.
+
 Ambiente: Windows 11, AMD Ryzen, **6 núcleos físicos** / 12 lógicos, CPython 3.14.4,
 N = 20.000.000, blocos de 10.000. Verificação: 1.270.607 primos, maior 19.999.999, soma
 12.272.577.818.052 — **as 15 execuções produziram exatamente esse trio**.
 
 | Versão | W | Execuções (s) | Mediana | Speedup | Eficiência | Teto Amdahl (p=0,97) | p medido |
 |---|---|---|---|---|---|---|---|
-| sequencial | 1 | 133,88 · 133,46 · 131,30 | **133,46 s** | 1,00× | 1,00 | — | — |
-| processos | 2 | 86,35 · 69,47 · 73,12 | **73,12 s** | **1,83×** | 0,91 | 1,94× | 0,904 |
-| processos | 4 | 38,36 · 44,14 · 46,48 | **44,14 s** | **3,02×** | 0,76 | 3,67× | 0,892 |
-| processos | 8 | 30,54 · 29,54 · 29,37 | **29,54 s** | **4,52×** | 0,56 | 6,61× | 0,890 |
-| threads | 4 | 146,61 · 144,95 · 147,44 | **146,61 s** | **0,91×** | 0,23 | — | — |
+| sequencial | 1 | 128,62 · 128,14 · 131,81 | **128,62 s** | 1,00× | 1,00 | — | — |
+| processos | 2 | 66,77 · 67,75 · 66,55 | **66,77 s** | **1,93×** | 0,96 | 1,94× | 0,962 |
+| processos | 4 | 34,34 · 34,47 · 34,56 | **34,47 s** | **3,73×** | 0,93 | 3,67× | 0,976 |
+| **processos** | **6** | 25,40 · 25,87 · 25,74 | **25,74 s** | **5,00×** | 0,83 | 5,22× | 0,960 |
+| processos | 8 | 25,29 · 26,92 · 26,73 | **26,73 s** | **4,81×** | 0,60 | 6,61× | 0,905 |
+| threads | 4 | 140,53 · 139,13 · 146,85 | **140,53 s** | **0,92×** | 0,23 | — | — |
 
-**Melhor resultado: 133,5 s → 29,5 s, speedup de 4,52×.**
+**Melhor resultado: 128,6 s → 25,7 s, speedup de 5,00× com W = 6.** E repare no que
+acontece depois: **W = 8 é mais lento que W = 6** (4,81× contra 5,00×). A máquina tem seis
+núcleos físicos, e o sétimo e o oitavo trabalhadores não têm onde rodar.
 
 O protocolo é reprodutível: repetida a medição em outra máquina (a instância EC2, via
 `scripts/executar_na_instancia.sh`), as tabelas são regeradas por `python src/tabelas.py`
@@ -214,68 +226,92 @@ a partir do JSON que o próprio `benchmark.py` grava.
 
 ## 6. Análise: o medido contra o previsto
 
-### 6.1 A distância para o teto cresce com W
+### 6.1 O medido acompanha o teto — até acabarem os núcleos físicos
 
-| W | Previsto (p = 0,97) | Medido | Fração do teto |
-|---|---|---|---|
-| 2 | 1,94× | 1,83× | **94 %** |
-| 4 | 3,67× | 3,02× | **82 %** |
-| 8 | 6,61× | 4,52× | **68 %** |
+| W | Previsto (p = 0,97) | Medido | Fração do teto | Eficiência |
+|---|---|---|---|---|
+| 2 | 1,94× | 1,93× | **99 %** | 0,96 |
+| 4 | 3,67× | 3,73× | **102 %** | 0,93 |
+| 6 | 5,22× | 5,00× | **96 %** | 0,83 |
+| 8 | 6,61× | 4,81× | **73 %** | 0,60 |
 
-### 6.2 A fração paralelizável real era menor do que estimamos
+A tabela se parte em duas metades. **Até W = 6 — que é exatamente o número de núcleos
+físicos — o medido acompanha o previsto de perto**, entre 96 % e 102 %. De W = 6 para
+W = 8 a coisa inverte: a fração do teto cai para 73 % e, mais do que isso, **o speedup
+diminui em valor absoluto** (5,00× → 4,81×). Acrescentar dois trabalhadores deixou o
+programa mais lento.
+
+Esse é o achado central da medição, e ele não precisa de interpretação: o ganho é limitado
+pelo número de **núcleos físicos**, e pedir mais paralelismo do que a máquina tem não é
+neutro — custa.
+
+### 6.2 A estimativa de p estava certa
 
 A métrica de **Karp-Flatt** inverte a pergunta: parte do speedup *medido* e calcula qual
-fração serial `e` o explicaria. Resultado: `e` = 0,096 · 0,108 · 0,110 para W = 2, 4 e 8 —
-ou seja, **a fração paralelizável real é ~0,89, não os 0,97 que estimamos**.
-Superestimamos em ~7 pontos percentuais o quanto do trabalho de fato escala.
+fração paralelizável o explicaria.
 
-Isso mostra que **o modelo não falhou; a nossa estimativa de entrada é que era otimista**.
-Recolocando o `p` medido na lei de Amdahl:
+| W | Speedup medido | `p` medido |
+|---|---|---|
+| 2 | 1,93× | 0,962 |
+| 4 | 3,73× | **0,976** |
+| 6 | 5,00× | 0,960 |
+| 8 | 4,81× | 0,905 |
 
-```
-p = 0,892 , n = 4   →   S = 1 / (0,108 + 0,892/4) = 3,02×
-```
+Até W = 6, o `p` medido fica entre **0,96 e 0,98** — em torno dos 0,97 que estimamos. A
+estimativa da equipe estava correta e, em W = 4, até ligeiramente conservadora: é por isso
+que ali o medido (3,73×) **passa** o teto calculado com 0,97 (3,67×). Não é violação da lei
+de Amdahl; é sinal de que o `p` verdadeiro naquele ponto é 0,976, e não 0,97.
 
-que é exatamente o speedup medido. Repare ainda que `e` é **quase constante**
-(0,096 → 0,110): se o gargalo fosse custo de coordenação explodindo com W, `e` cresceria
-muito mais rápido. O leve crescimento é a parcela que de fato aumenta com W; o grosso é
-uma fração serial aproximadamente fixa.
+A queda para 0,905 em W = 8 também não indica que o algoritmo mudou. O que mudou foi o
+denominador do modelo: Amdahl supõe `n` unidades de execução **independentes**, e a oitava
+não existe nesta máquina. O modelo, forçado a explicar um speedup pior com um `n` maior,
+devolve a única resposta que pode — uma fração serial maior.
 
 ### 6.3 O que limitou o ganho
 
 **(a) Espera na seção crítica — descartada.** A trava é adquirida 2.000 vezes na execução
-inteira, e cada seção crítica são três somas de inteiros: num total de 44 s, menos de
-0,1 %. A seção crítica **não** é o gargalo, e é esse justamente o efeito de tê-la mantido
-pequena.
+inteira, e cada seção crítica são três somas de inteiros: num total de 34 s, menos de
+0,1 %. A seção crítica **não** é o gargalo — e é justamente esse o efeito de tê-la mantido
+pequena. A eficiência de **0,93 em W = 4** confirma: quase nada se perde em coordenação.
 
 **(b) Custo fixo de criar processos e mover blocos — pequeno aqui, decisivo em volumes
 menores.** O `spawn` reinicia o interpretador em cada processo, e os blocos são
-serializados pela fila. Esse custo é ~constante em segundos, então o que muda é o trabalho
-que o dilui. Com o mesmo código e o mesmo W = 4: **N = 1.000.000 → 2,43×**, contra
-**N = 20.000.000 → 3,02×**. É por isso que a exigência de que o sequencial leve *minutos*
-não é burocracia: em segundos, a medição mediria sobretudo o custo de partida.
+serializados pela fila. Esse custo é ~constante em segundos, então o que muda é o tamanho
+do trabalho que o dilui. Com o mesmo código e o mesmo W = 4:
 
-**(c) Núcleos físicos — o que explica a queda de eficiência.** Ela cai de 0,91 (W = 2)
-para 0,76 (W = 4) e 0,56 (W = 8). A máquina tem **6 núcleos físicos**: com W = 8, oito
-processos disputam seis núcleos. O speedup ainda sobe (3,02× → 4,52×) porque o SMT
-aproveita ociosidade *dentro* do núcleo, mas cada trabalhador rende menos. Isso também
-mostra que **comparar W = 8 com o teto de 6,61× é injusto com o modelo**: esse teto
-pressupõe oito unidades independentes, e há seis. O teto honesto para esta máquina é
-Amdahl com n = 6, que dá **5,22×** — e os 4,52× medidos são **87 %** dele.
+| N | Tempo sequencial | Speedup com W = 4 |
+|---|---|---|
+| 1.000.000 | 1,85 s | 2,44× |
+| 20.000.000 | 128,62 s | **3,73×** |
+
+É por isso que a exigência de que o sequencial leve *minutos* não é burocracia: em
+segundos, a medição mediria sobretudo o custo de partida, e concluiria que o programa
+escala mal quando o que escala mal é o experimento.
+
+**(c) Núcleos físicos — o limite dominante, e desta vez medido diretamente.** A eficiência
+cai de 0,96 (W = 2) para 0,93 (W = 4), 0,83 (W = 6) e 0,60 (W = 8). Até seis trabalhadores
+a queda é suave — é o custo de coordenação crescendo devagar. De seis para oito ela
+desaba, porque não há mais núcleo para ocupar: os dois trabalhadores extras passam a
+dividir núcleos com os outros seis, e o SMT não compensa o que a troca de contexto custa.
+Daí o **W = 8 ser mais lento que W = 6**.
+
+Isso também mostra que **comparar W = 8 com o teto de 6,61× é injusto com o modelo**: esse
+teto pressupõe oito unidades independentes, e há seis. O teto honesto para esta máquina é
+Amdahl com n = 6 — **5,22×** —, e os 5,00× medidos em W = 6 são **96 %** dele.
 
 **(d) Frequência do processador — fator provável, não isolado.** Com um núcleo ativo o
 processador opera em turbo mais alto do que com todos carregados, o que penaliza o speedup
 porque o denominador da conta (o tempo sequencial) é obtido na condição mais favorável.
 **Não isolamos esse efeito** — exigiria fixar a frequência no firmware —, então fica
-registrado como causa provável, e não como valor medido.
+registrado como causa provável de parte da diferença residual, e não como valor medido.
 
 ### 6.4 Threads: a evidência que justifica a escolha
 
-Com quatro threads o programa levou **146,61 s** contra **133,46 s** do sequencial: ficou
-**13 segundos mais lento que sem paralelismo nenhum** (0,91×). É o previsto — a GIL
-permite só uma thread executando bytecode por vez, de modo que as quatro se revezam em vez
-de somar tempo de processador, e ainda pagam troca de contexto e disputa pela trava. O
-mesmo algoritmo com processos rende 3,02×. É a diferença entre afirmar e demonstrar: a
+Com quatro threads o programa levou **140,53 s** contra **128,62 s** do sequencial: ficou
+**12 segundos mais lento que sem paralelismo nenhum** (0,92×). É o previsto — a GIL permite
+só uma thread executando bytecode por vez, de modo que as quatro se revezam em vez de somar
+tempo de processador, e ainda pagam troca de contexto e disputa pela trava. O mesmo
+algoritmo, com processos, rende **5,00×**. É a diferença entre afirmar e demonstrar: a
 escolha por processos não é preferência, é o que os números exigem.
 
 ---
@@ -285,7 +321,7 @@ escolha por processos não é preferência, é o que os números exigem.
 - **O ganho é limitado por núcleos físicos, não por vCPU** — cada vCPU x86 é uma *thread*
   de um núcleo, e duas threads do mesmo núcleo disputam as mesmas unidades de execução.
 - **A medição vale para este volume** — com N muito menor, o custo de partida domina
-  (2,43× em N = 1 milhão contra 3,02× em 20 milhões, mesmo W).
+  (2,44× em N = 1 milhão contra 3,73× em 20 milhões, mesmo W).
 - **Carimbos de Lamport dão ordem parcial** — preservam causalidade, não detectam
   concorrência; isso exigiria relógios vetoriais.
 - **O checksum usa 64 bits** — a soma até 20 milhões (1,2 × 10¹³) cabe folgada; acima de

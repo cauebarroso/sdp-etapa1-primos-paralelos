@@ -1,6 +1,6 @@
 # Roteiro da apresentação — 10 minutos
 
-**Equipe:** Cauê Barroso · Cesár Ribeiro · Augusto Pereira
+**Equipe:** Cauê Barroso · César Ribeiro · Augusto Pereira
 **Turma:** CC6MA · **Data:** 22/09
 
 > **Atenção — a apresentação roda em outra máquina.** O código foi escrito e medido
@@ -66,8 +66,15 @@ Cole as tabelas na seção 5 do relatório e gere o PDF. **Sem isso, o relatóri
 números de uma máquina e a demonstração mostra outra** — e a lauda desconta exatamente
 por isso ("speedup calculado sem o tempo sequencial medido na mesma máquina").
 
+> **Feche tudo antes de medir.** Não é conselho genérico — medimos o efeito: sob carga de
+> fundo, o speedup com 2 processos caiu de **1,93× para 1,27×** (−34 %). O tempo
+> sequencial quase não muda, porque usa um núcleo só e convive bem com outra carga; a
+> interferência penaliza **apenas a versão paralela** — ou seja, estraga exatamente o
+> número que vocês vão apresentar, e sem dar nenhum sinal de que algo está errado.
+
 ### Checklist da véspera
 
+- [ ] Tudo fechado durante a medição (navegador, jogos, streaming, downloads)
 - [ ] `preflight.py` passou, N e W anotados
 - [ ] `benchmark.py` rodado na máquina da apresentação, com esse N
 - [ ] Tabelas coladas no relatório, PDF gerado e enviado ao ambiente virtual
@@ -110,9 +117,9 @@ tempo da apresentação.
 | Parte | Tempo | Quem apresenta |
 |---|---|---|
 | 1. O problema e por que ele se divide | 2 min | **Cauê** |
-| 2. A seção crítica | 2 min | **Cesár** |
+| 2. A seção crítica | 2 min | **César** |
 | 3. Os recursos na nuvem | 2 min | **Augusto** |
-| 4. A execução | 3 min | **Cauê** (1,5) + **Cesár** (1,5) |
+| 4. A execução | 3 min | **Cauê** (1,5) + **César** (1,5) |
 | 5. O ganho | 1 min | **Augusto** |
 
 Cada um fala ~3,5 minutos. Ninguém apresenta a parte sobre a qual vai ser arguido.
@@ -142,7 +149,7 @@ Cada um fala ~3,5 minutos. Ninguém apresenta a parte sobre a qual vai ser argui
 
 ---
 
-## Parte 2 — A seção crítica (2 min) — **Cesár**
+## Parte 2 — A seção crítica (2 min) — **César**
 
 **Na tela:** `src/paralelo_processos.py`, de `_dobrar_no_estado` até `trabalhador`.
 
@@ -218,7 +225,7 @@ Cada um fala ~3,5 minutos. Ninguém apresenta a parte sobre a qual vai ser argui
 
 ---
 
-## Parte 4 — A execução (3 min) — **Cauê** e **Cesár**
+## Parte 4 — A execução (3 min) — **Cauê** e **César**
 
 ### Cauê (1,5 min) — **terminal A**, que vem rodando desde o minuto 0
 
@@ -237,7 +244,7 @@ python3 paralelo_processos.py -n <N> -w <W>
 > os blocos do fim do intervalo custam mais que os do começo, e a fila reequilibra isso
 > sozinha."
 
-### Cesár (1,5 min) — quando terminar
+### César (1,5 min) — quando terminar
 
 > "**[tempo paralelo]** contra **[tempo sequencial]** do sequencial. E o mais importante:
 > **os três números são exatamente os mesmos** — mesma contagem, mesmo maior primo, mesma
@@ -293,7 +300,7 @@ Cada integrante responde sobre uma parte que **não** apresentou.
 > fração serial aparente cresce com W — logo o limite é custo de paralelização, e não uma
 > parte serial fixa do algoritmo.
 
-### Cesár — não apresentou **problema**, **nuvem** nem **ganho**
+### César — não apresentou **problema**, **nuvem** nem **ganho**
 
 **"Qual é a unidade de trabalho, e por que ela é independente?"**
 > Um bloco de 10 mil inteiros consecutivos. É independente porque testar a primalidade de

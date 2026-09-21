@@ -11,9 +11,9 @@
 
 | # | Nome | Matrícula |
 |---|---|---|
-| 1 | Cauê Barroso | *(preencher)* |
-| 2 | Cesár Ribeiro | *(preencher)* |
-| 3 | Augusto Pereira | *(preencher)* |
+| 1 | Cauê Barroso | 24070033 |
+| 2 | César Ribeiro | 24070011 |
+| 3 | Augusto Pereira | 24070005 |
 
 **Problema escolhido:**
 
@@ -27,7 +27,7 @@
 | Condição | Resposta da equipe |
 |---|---|
 | **O trabalho se divide em partes independentes? Em que unidade?** | Sim. A unidade de trabalho é um **bloco de 10.000 inteiros consecutivos**, `[início, fim)`. Decidir se um número é primo não depende de nenhum outro número do intervalo: cada bloco é resolvido sozinho e devolve um resumo parcial. Para N = 20 milhões são **2.000 blocos** independentes. |
-| **Qual é o volume da entrada, e quanto tempo a versão sequencial deve levar?** | Entrada: N = 20.000.000 — 20 milhões de candidatos a testar, dos quais 1.270.607 são primos. A versão sequencial leva **2 min 13 s** (133,46 s medidos, mediana de 3 execuções). Minutos, não segundos, como a lauda exige. |
+| **Qual é o volume da entrada, e quanto tempo a versão sequencial deve levar?** | Entrada: N = 20.000.000 — 20 milhões de candidatos a testar, dos quais 1.270.607 são primos. A versão sequencial leva **2 min 09 s** (128,62 s medidos, mediana de 3 execuções). Minutos, não segundos, como a lauda exige. |
 | **Como se verifica que o resultado está correto?** | Três camadas. (1) **Assinatura de três campos** — contagem, maior primo e soma: errar um primo por outro muda pelo menos um dos três. (2) **Algoritmo independente** — um Crivo de Eratóstenes calcula a mesma resposta por outro caminho em menos de 1 s; se os dois concordam, não é um erro comum aos dois. (3) **Valor externo conhecido** — π(20.000.000) = 1.270.607 confere com a literatura. Além disso a versão paralela é repetida 5× com a mesma entrada e precisa devolver o mesmo trio. |
 | **Que estado é escrito por mais de um fluxo?** | Os **três acumuladores globais em memória compartilhada** (`multiprocessing.RawValue`): `contagem`, `maior` e `soma`. Todo trabalhador, ao terminar um bloco, funde o seu parcial nesses três. |
 
@@ -38,8 +38,8 @@
 | Decisão | Escolha | Justificativa |
 |---|---|---|
 | **Paralelismo de dados ou de tarefas** | **De dados** | Todos os trabalhadores executam **a mesma operação** (`resumo_intervalo`) sobre **fatias diferentes do mesmo domínio** [2, N]. Não há etapas distintas de um pipeline que pudessem virar tarefas diferentes. |
-| **Processo ou thread** | **Processo** (`multiprocessing`) | O trabalho é **limitado por processador**, não por espera: o laço quente é divisão inteira em Python puro, sem disco, sem rede, sem banco. Em CPython a GIL deixa só uma thread executando bytecode por vez, então threads não somam tempo de CPU. **Medimos as duas versões**: com threads o speedup fica em ~0,9× (pior que o sequencial, por causa da troca de contexto); com processos passa de 3×. Cada processo tem seu interpretador e sua GIL, e ocupa um núcleo de verdade. |
-| **Quantos trabalhadores em paralelo** | **W = número de núcleos físicos** (4 na instância `c5.2xlarge`). Medimos **W = 2, 4 e 8** | Trabalho de CPU não ganha nada com mais trabalhadores que núcleos: acima disso os processos passam a disputar o mesmo núcleo. Medir 2, 4 e 8 mostra a curva subindo e depois saturando — e W = 8 acima dos núcleos físicos documenta a saturação, em vez de escondê-la. |
+| **Processo ou thread** | **Processo** (`multiprocessing`) | O trabalho é **limitado por processador**, não por espera: o laço quente é divisão inteira em Python puro, sem disco, sem rede, sem banco. Em CPython a GIL deixa só uma thread executando bytecode por vez, então threads não somam tempo de CPU. **Medimos as duas versões**: com threads o speedup fica em 0,92× (pior que o sequencial, por causa da troca de contexto); com processos chega a 5,00×. Cada processo tem seu interpretador e sua GIL, e ocupa um núcleo de verdade. |
+| **Quantos trabalhadores em paralelo** | **W = número de núcleos físicos** (4 na instância `c5.2xlarge`; 6 na máquina de referência). Medimos **W = 2, 4, 6 e 8** | Trabalho de CPU não ganha nada com mais trabalhadores que núcleos: acima disso os processos passam a disputar o mesmo núcleo. Medir 2, 4, 6 e 8 mostra a curva subindo e depois **regredindo**: na máquina de referência (6 núcleos físicos) o pico é em W = 6, com 5,00×, e W = 8 cai para 4,81×. Medir acima dos núcleos físicos documenta a saturação em vez de escondê-la. |
 | **Como o trabalho é dividido entre eles** | **Fila de 2.000 blocos com balanceamento dinâmico** | Os blocos vão para uma `multiprocessing.Queue`; cada trabalhador puxa o próximo assim que termina o anterior. Blocos de tamanho igual **não** têm custo igual — testar primalidade de números grandes exige mais divisões que de números pequenos, então o fim do intervalo custa mais que o começo. Com **T ≫ W** (2.000 blocos para até 8 trabalhadores), a fila redistribui essa diferença sozinha; com um bloco fixo por trabalhador, quem pegasse o fim do intervalo seguraria todo mundo. |
 
 > **A justificativa de processo ou thread precisa dizer se o trabalho é limitado por processador ou por espera.**
@@ -91,9 +91,10 @@
 | **Speedup previsto pela lei de Amdahl, com essa fração e esse número de núcleos** | Com **p = 0,97**: **n = 2 → 1,94×**; **n = 4 → 3,67×**; **n = 8 → 6,61×**. O cálculo para n = 4: `S = 1 / (0,03 + 0,97/4) = 1 / 0,2725 = 3,67`. |
 
 > **Resultado já medido** (N = 20.000.000, 6 núcleos físicos, mediana de 3 execuções):
-> sequencial **133,46 s**; W = 2 → **1,83×**; W = 4 → **3,02×**; W = 8 → **4,52×**
-> (133,5 s → 29,5 s). Com **threads**, W = 4 → **0,91×** — mais lento que o sequencial,
-> que é a evidência da GIL. Todas as 15 execuções deram o mesmo resultado do crivo.
+> sequencial **128,62 s**; W = 2 → **1,93×**; W = 4 → **3,73×**; W = 6 → **5,00×**;
+> W = 8 → **4,81×** (128,6 s → 25,7 s no melhor caso). Com **threads**, W = 4 → **0,92×**
+> — mais lento que o sequencial, que é a evidência da GIL. **W = 8 é mais lento que
+> W = 6**: a máquina tem 6 núcleos físicos. Todas as 18 execuções conferiram com o crivo.
 >
 > **O relatório de 22/09 compara o speedup medido com esse número previsto e explica a
 > diferença.** Além do teto de Amdahl, o `benchmark.py` calcula a **fração serial medida**

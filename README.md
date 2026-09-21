@@ -1,7 +1,7 @@
 # Contagem paralela de primos — Etapa 1
 
 **070080 Sistemas Distribuídos e Paralelos** · Turma CC6MA · Prof. Fábio Rocha de Araújo
-**Equipe:** Cauê Barroso · Cesár Ribeiro · Augusto Pereira
+**Equipe:** Cauê Barroso · César Ribeiro · Augusto Pereira
 
 Conta os números primos do intervalo `[2, N]` em duas versões do mesmo programa —
 **sequencial** e **paralela com processos** — mede o ganho na mesma máquina e com a
@@ -19,14 +19,17 @@ mediana de 3 execuções por configuração — todas conferindo contra o crivo)
 
 | Versão | Trabalhadores | Tempo | Speedup | Teto de Amdahl |
 |---|---|---|---|---|
-| sequencial | 1 | 133,46 s | 1,00× | — |
-| processos | 2 | 73,12 s | 1,83× | 1,94× |
-| processos | 4 | 44,14 s | 3,02× | 3,67× |
-| **processos** | **8** | **29,54 s** | **4,52×** | 6,61× |
-| threads | 4 | 146,61 s | **0,91×** | — (a GIL) |
+| sequencial | 1 | 128,62 s | 1,00× | — |
+| processos | 2 | 66,77 s | 1,93× | 1,94× |
+| processos | 4 | 34,47 s | 3,73× | 3,67× |
+| **processos** | **6** | **25,74 s** | **5,00×** | 5,22× |
+| processos | 8 | 26,73 s | 4,81× | 6,61× |
+| threads | 4 | 140,53 s | **0,92×** | — (a GIL) |
 
-Com quatro threads o programa fica **mais lento que sem paralelismo nenhum** — é a
-evidência medida de que trabalho de CPU em CPython exige processos.
+Dois resultados para reparar. Com quatro threads o programa fica **mais lento que sem
+paralelismo nenhum** — a evidência medida de que trabalho de CPU em CPython exige
+processos. E **W = 8 é mais lento que W = 6**: a máquina tem 6 núcleos físicos, e pedir
+mais paralelismo do que existe não é neutro, custa.
 
 Os números completos, incluindo a fração serial medida (Karp-Flatt) e a análise do que
 limitou o ganho, estão em [`docs/Relatorio-Etapa1.md`](docs/Relatorio-Etapa1.md) e em
@@ -66,7 +69,7 @@ cd src
 | Versão com threads (evidência da GIL) | `python paralelo_threads.py -n 20000000 -w 4` |
 | **Provar que o resultado é estável** | `python verificar.py -n 2750000 -w 6 -r 5` (~20 s) |
 | **Mostrar a condição de corrida** | `python demo_corrida.py -p 6 -i 100000 -r 3` |
-| **Medir tudo e calcular o speedup** | `python benchmark.py -n 20000000 -w 2,4,8 -r 3 --com-threads` |
+| **Medir tudo e calcular o speedup** | `python benchmark.py -n 20000000 -w 2,4,6,8 -r 3 --com-threads` |
 | Log de eventos com carimbo de Lamport | `python lamport.py -n 200000 -w 4` |
 | Página de status (porta do serviço) | `python servidor_status.py --porta 8000` |
 
@@ -83,10 +86,10 @@ python src/tabelas.py --entrada resultados/resultados.json
 | Requisito | Como é atendido |
 |---|---|
 | Trabalho que se divide em partes independentes | Blocos de 10.000 inteiros; primalidade de um número não depende de nenhum outro. 2.000 blocos para N = 20 M. |
-| Entrada grande o bastante para levar **minutos** | N = 20.000.000 → **133,46 s** sequenciais (medido). |
+| Entrada grande o bastante para levar **minutos** | N = 20.000.000 → **128,62 s** sequenciais (medido). |
 | Resultado verificável | Crivo de Eratóstenes (algoritmo **independente**) + assinatura de 3 campos + π(20 M) = 1.270.607 conhecido. |
 | Estado compartilhado escrito por mais de um fluxo, protegido | Três `RawValue` em memória compartilhada, protegidos por `multiprocessing.Lock`. |
-| Processos, e não threads, para trabalho de CPU | Justificado **e medido**: threads dão ~0,9×, processos passam de 3×. |
+| Processos, e não threads, para trabalho de CPU | Justificado **e medido**: threads dão 0,92×, processos chegam a 5,00×. |
 | Instância provisionada com grupo de segurança correto | `scripts/provisionar_aws.sh`: 22/tcp só do IP da equipe, 8000/tcp para o serviço. |
 
 ---
@@ -132,7 +135,7 @@ resultados/
 ./scripts/provisionar_aws.sh
 
 # 2. mede NA instancia: sequencial e paralelo, mesma maquina, mesma entrada
-./scripts/executar_na_instancia.sh 20000000 2,4,8
+./scripts/executar_na_instancia.sh 20000000 2,4,6,8
 
 # 3. atualiza as tabelas do relatorio com os numeros da nuvem
 python src/tabelas.py --entrada resultados/nuvem/resultados.json

@@ -262,6 +262,12 @@ def _principal() -> int:
     print("=" * 70)
     print(f"\nNucleos fisicos detectados: {fisicos if fisicos else 'indeterminado'}"
           f"  ->  W sugerido: {w_sugerido}")
+    print("\nANTES DE MEDIR: feche os outros programas.")
+    print("Nao e conselho generico -- medimos o efeito: sob carga de fundo, o")
+    print("speedup com 2 processos caiu de 1,93x para 1,27x (-34%). O tempo")
+    print("sequencial quase nao muda, porque usa 1 nucleo so; a interferencia")
+    print("penaliza apenas o paralelo, e estraga justamente o numero do speedup.")
+
     if n_sugerido:
         print("\nComandos ja com os valores desta maquina:\n")
         print("  # 1. medicao completa (rode ANTES da apresentacao)")
