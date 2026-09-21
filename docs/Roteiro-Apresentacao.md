@@ -294,6 +294,17 @@ Cada integrante responde sobre uma parte que **não** apresentou.
 > instância. Restringindo ao /32 da equipe, a superfície some para todo o resto da
 > internet.
 
+**"Como vocês sabem que a medição é confiável?"**
+> Por quatro razões. As duas versões rodam na mesma máquina, com a mesma entrada, na mesma
+> invocação do programa — não há reinício nem troca de condição entre elas. Cada
+> configuração roda três vezes e reportamos a mediana, então uma execução atípica não
+> arrasta o número. O resultado de toda execução é conferido contra o crivo **antes** de o
+> tempo ser aceito: tempo bom com resultado errado não entra. E medimos com a máquina
+> ociosa — isso importa porque carga de fundo penaliza só a versão paralela, que disputa
+> todos os núcleos, enquanto a sequencial usa um só; medir sem esse cuidado **subestima** o
+> ganho. Chegamos a verificar: sob carga, o speedup com 2 processos caía de 1,93× para
+> 1,27×.
+
 **"Por que o speedup medido ficou abaixo do teto de Amdahl?"**
 > Três motivos: criar os processos (o `spawn` reinicia o interpretador em cada um),
 > passar os blocos pela fila, e a espera na trava. A métrica de Karp-Flatt mostra que a
