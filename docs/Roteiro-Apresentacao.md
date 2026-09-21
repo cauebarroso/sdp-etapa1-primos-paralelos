@@ -90,6 +90,7 @@ por isso ("speedup calculado sem o tempo sequencial medido na mesma máquina").
 
 | # | O quê |
 |---|---|
+| 0 | **`./scripts/liberar_meu_ip.sh`** — a regra da porta 22 é presa ao IP de onde a instância foi criada. Se ela foi provisionada em casa e a apresentação é na faculdade, **o SSH vai ser recusado**. Rode isto na rede da apresentação, antes de tudo |
 | 1 | Console AWS **aberto e logado**, na tela de instâncias (o critério exige console ao vivo, não captura) |
 | 2 | Página de status aberta: `http://<IP>:8000/` |
 | 3 | Três terminais abertos, **fonte grande**: A = sequencial · B = paralelo · C = testes |
