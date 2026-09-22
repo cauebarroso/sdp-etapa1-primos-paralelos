@@ -3,6 +3,10 @@
 **070080 Sistemas Distribuídos e Paralelos** · Turma CC6MA · Prof. Fábio Rocha de Araújo
 **Equipe:** Cauê Barroso · César Ribeiro · Augusto Pereira
 
+> **Antes de entregar, leia [`docs/ANTES-DE-ENTREGAR.md`](docs/ANTES-DE-ENTREGAR.md).**
+> A seção 4 do relatório descreve uma instância EC2 específica. Se a instância real for
+> outra — ou não existir —, são três linhas a ajustar, e o guia diz exatamente quais.
+
 Conta os números primos do intervalo `[2, N]` em duas versões do mesmo programa —
 **sequencial** e **paralela com processos** — mede o ganho na mesma máquina e com a
 mesma entrada, e prova que as duas chegam ao mesmo resultado.
@@ -135,6 +139,7 @@ docs/
   Relatorio-Etapa1.pdf         A ENTREGA: 6 paginas, pronto para o ambiente virtual
   Provisionamento-Console.md   passo a passo da AWS pelo console, sem CLI
   AWS-Academy.md               o que muda no Learner Lab (sessao, tipos, regiao)
+  ANTES-DE-ENTREGAR.md         os ultimos ajustes, por cenario   <- leia antes de entregar
   Roteiro-Apresentacao.md      roteiro dos 10 minutos + preparo da arguicao
 
 resultados/
