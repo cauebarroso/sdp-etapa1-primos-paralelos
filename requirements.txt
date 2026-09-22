@@ -6,4 +6,9 @@
 # ja vem no Amazon Linux 2023, sem passo de instalacao e sem rede no meio
 # da medicao.
 #
-# Requer Python 3.10 ou mais novo (usamos a sintaxe `int | None`).
+# Requer Python 3.9 ou mais novo.
+#
+# As anotacoes usam a sintaxe `int | None`, que sozinha exigiria 3.10 -- mas
+# todo modulo comeca com `from __future__ import annotations`, que transforma
+# anotacao em texto e nunca a avalia em tempo de execucao. Por isso roda em 3.9.
+# Em caso de duvida, `python src/preflight.py` confere a versao e avisa.
