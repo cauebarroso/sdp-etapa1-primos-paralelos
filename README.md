@@ -103,7 +103,7 @@ Ou simplesmente abrir `docs/Relatorio-Etapa1.html` no navegador e dar **Ctrl+P**
 | Resultado verificável | Crivo de Eratóstenes (algoritmo **independente**) + assinatura de 3 campos + π(20 M) = 1.270.607 conhecido. |
 | Estado compartilhado escrito por mais de um fluxo, protegido | Três `RawValue` em memória compartilhada, protegidos por `multiprocessing.Lock`. |
 | Processos, e não threads, para trabalho de CPU | Justificado **e medido**: threads dão 0,92×, processos chegam a 5,00×. |
-| Instância provisionada com grupo de segurança correto | `scripts/provisionar_aws.sh`: 22/tcp só do IP da equipe, 8000/tcp para o serviço. |
+| Instância provisionada com grupo de segurança correto | `scripts/provisionar_aws.sh` ou o guia pelo console: 22/tcp só do IP da equipe, 8000/tcp para o serviço. |
 
 ---
 
@@ -134,6 +134,7 @@ docs/
   Relatorio-Etapa1.html        o mesmo relatorio, formatado para impressao
   Relatorio-Etapa1.pdf         A ENTREGA: 6 paginas, pronto para o ambiente virtual
   Provisionamento-Console.md   passo a passo da AWS pelo console, sem CLI
+  AWS-Academy.md               o que muda no Learner Lab (sessao, tipos, regiao)
   Roteiro-Apresentacao.md      roteiro dos 10 minutos + preparo da arguicao
 
 resultados/
@@ -149,6 +150,11 @@ resultados/
 Os scripts abaixo usam o **AWS CLI**. Se ele nao estiver instalado, o guia
 [`docs/Provisionamento-Console.md`](docs/Provisionamento-Console.md) faz o mesmo pelo
 console web, sem instalar nada.
+
+> **Usando AWS Academy / Learner Lab?** Leia
+> [`docs/AWS-Academy.md`](docs/AWS-Academy.md) antes: a sessao expira e para a instancia,
+> o IP publico muda ao religar, os tipos de instancia sao restritos e a regiao costuma ser
+> fixa. Tudo isso afeta o que da para medir e o que escrever na secao 4 do relatorio.
 
 ```bash
 # 1. provisiona (descobre o IP da equipe e restringe a porta 22 a ele)
