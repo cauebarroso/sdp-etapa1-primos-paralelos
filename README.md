@@ -41,6 +41,50 @@ limitou o ganho, estão em [`docs/Relatorio-Etapa1.md`](docs/Relatorio-Etapa1.md
 
 ---
 
+## Para a equipe: por onde começar a estudar
+
+A arguição vale **1,5 dos 3,0** e cada um responde sobre uma parte que **não** apresentou.
+Então todo mundo precisa entender o projeto inteiro, mas com ênfases diferentes.
+
+**Todos leiam, nesta ordem:**
+
+1. [`docs/Relatorio-Etapa1.pdf`](docs/Relatorio-Etapa1.pdf) — 6 páginas, é o projeto inteiro
+2. [`docs/Roteiro-Apresentacao.md`](docs/Roteiro-Apresentacao.md) — quem fala o quê, e as
+   **11 perguntas de arguição já respondidas**
+3. Rodem na própria máquina (leva 1 minuto):
+   ```bash
+   cd src
+   python preflight.py --alvo 150
+   ```
+   Ele confere o ambiente, prova que sequencial e paralelo dão o mesmo resultado, e imprime
+   os comandos com o N certo para aquele computador.
+
+**Depois, cada um aprofunda o que vai ser perguntado:**
+
+| Quem | Apresenta | **Será arguido sobre** | Onde estudar |
+|---|---|---|---|
+| **Cauê** | problema · execução | nuvem · ganho | Relatório §4 e §6 |
+| **César** | seção crítica · execução | problema · nuvem · ganho | Relatório §1, §4 e §6 |
+| **Augusto** | nuvem · ganho | problema · seção crítica | Relatório §1 e §3; `src/paralelo_processos.py` |
+
+**Para ver funcionando** (bem mais convincente que só ler):
+
+```bash
+cd src
+python demo_corrida.py -p 6 -i 100000 -r 3    # ~12s: a corrida, com e sem trava
+python verificar.py -n 2750000 -w 4 -r 5      # ~20s: 5 execucoes, resultado estavel
+```
+
+O primeiro mostra o total vindo errado e **diferente a cada execução** sem a trava, e exato
+com ela. O segundo mostra a versão paralela dando o mesmo resultado cinco vezes seguidas.
+São os dois testes da parte 2 da apresentação.
+
+**Se precisarem mexer no código**, o ponto de entrada é
+[`src/paralelo_processos.py`](src/paralelo_processos.py): a função `_dobrar_no_estado` é a
+seção crítica, e `trabalhador` mostra o que fica dentro e fora da trava.
+
+---
+
 ## Vai rodar em outra máquina? Comece por aqui
 
 O N foi escolhido pela velocidade de um processador específico. Em outra máquina, o
