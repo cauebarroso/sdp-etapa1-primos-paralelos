@@ -313,32 +313,44 @@ def trabalhador(fila, contagem, maior, soma, trava, usar_trava):
   não implica dependência causal; detectar concorrência exigiria relógios vetoriais.</p></div>
 
   <!-- ============================================================ 4 -->
-  <h2><span class="n">4</span>Recursos provisionados na nuvem</h2>
+  <h2><span class="n">4</span>Arquitetura e provisionamento na nuvem</h2>
+
+  <p>Esta seção registra as decisões de provisionamento da equipe e a razão de cada uma. O
+  ambiente usado é o <strong>AWS Academy (Learner Lab)</strong>, que restringe a região e os
+  portes de instância disponíveis; onde isso afeta uma decisão, está anotado. A instância é
+  criada por execução (última linha da tabela) e demonstrada ao vivo no console. <strong>A
+  medição relatada na seção 5 foi feita na máquina descrita ali</strong>, e não na instância.</p>
 
   <div class="rolante"><table class="chave">
     <tbody>
-      <tr><td>Região / zonas</td><td style="text-align:left"><code>sa-east-1</code> (São Paulo), <strong>uma</strong> zona (<code>sa-east-1a</code>)</td></tr>
-      <tr><td>Instância</td><td style="text-align:left">1 × <code>c5.2xlarge</code> — 8 vCPU (4 núcleos físicos), 16 GiB</td></tr>
+      <tr><td>Zonas de disponibilidade</td><td style="text-align:left"><strong>Uma única zona</strong> — SLA de 99,5 %</td></tr>
+      <tr><td>Região</td><td style="text-align:left">A disponibilizada pelo ambiente acadêmico</td></tr>
+      <tr><td>Instância</td><td style="text-align:left"><strong>1</strong>, família compute-optimized, o maior porte disponível — alvo: 8 vCPU / 4 núcleos físicos</td></tr>
       <tr><td>Armazenamento</td><td style="text-align:left">EBS <strong>gp3, 20 GB</strong> (disco raiz)</td></tr>
       <tr><td>Portas de entrada</td><td style="text-align:left"><strong>22/tcp</strong> ← <code>&lt;IP da equipe&gt;/32</code> · <strong>8000/tcp</strong> ← <code>0.0.0.0/0</code></td></tr>
       <tr><td>Ciclo de vida</td><td style="text-align:left"><strong>Criada por execução</strong></td></tr>
     </tbody>
   </table></div>
 
-  <p><strong>Região e SLA.</strong> Com <strong>instância isolada em uma zona</strong>, o
-  compromisso que passa a valer é o de <strong>99,5 %</strong> — <strong>216 minutos</strong> de
-  indisponibilidade admitida em 30 dias. Os <strong>99,99 %</strong> (4,3 minutos) exigiriam
-  instâncias em <strong>duas ou mais zonas</strong>. Aceitamos 99,5 % conscientemente: a carga é
-  um <strong>lote</strong> de poucos minutos, não um serviço contínuo; se a instância cair,
-  repete-se a execução. E há razão de método — a medição exige sequencial e paralelo
-  <strong>na mesma máquina</strong>, então duas zonas significariam duas instâncias, o dobro do
-  custo e nenhum ganho de medição.</p>
+  <p><strong>Zona única e SLA.</strong> A decisão é operar com <strong>instância isolada em uma
+  única zona</strong>, e com isso o compromisso que passa a valer é o de <strong>99,5 %</strong>
+  — <strong>216 minutos</strong> de indisponibilidade admitida em 30 dias. Os
+  <strong>99,99 %</strong> (4,3 minutos) exigiriam instâncias em <strong>duas ou mais
+  zonas</strong>. Aceitamos 99,5 % conscientemente: a carga é um <strong>lote</strong> de poucos
+  minutos, não um serviço contínuo; se a instância cair, repete-se a execução. E há razão de
+  método — a medição exige sequencial e paralelo <strong>na mesma máquina</strong>, então duas
+  zonas significariam duas instâncias, o dobro do custo e nenhum ganho de medição. A região é a
+  disponibilizada pelo ambiente acadêmico, que não permite escolhê-la; o compromisso de SLA
+  independe dela.</p>
 
-  <p><strong>Família e tamanho.</strong> A família <code>c</code> é otimizada para CPU, que é o
-  nosso gargalo. Descartamos a família <code>t</code> (burstable) por motivo concreto: ela
-  entrega créditos de CPU que se esgotam, e uma medição de minutos terminaria com o desempenho
-  caindo no meio — o tempo medido não seria o do algoritmo. Memória não é gargalo: o programa não
-  guarda a lista de primos, só acumula três inteiros.</p>
+  <p><strong>Família e porte.</strong> A família <code>c</code> (compute-optimized) é a adequada,
+  porque o gargalo é CPU. Descartamos a família <code>t</code> (burstable) por motivo concreto:
+  ela entrega créditos de CPU que se esgotam, e uma medição de minutos terminaria com o
+  desempenho caindo no meio — o tempo medido não seria o do algoritmo. Memória não é gargalo: o
+  programa não guarda a lista de primos, só acumula três inteiros, e usa poucos MB. O porte-alvo
+  é de 8 vCPU (4 núcleos físicos); como o Learner Lab limita os portes, usamos o maior
+  disponível, e é o número de núcleos <strong>físicos</strong> efetivo que determina até qual W
+  vale medir — abaixo de dois núcleos físicos não há ganho de paralelismo a observar (§6.3c).</p>
 
   <p><strong>Entrada e saída.</strong> Não há arquivo de entrada — a entrada é o parâmetro
   <code>N</code>, e os blocos são gerados em memória. A saída são <code>resultados.json</code>
@@ -361,7 +373,9 @@ def trabalhador(fila, contagem, maior, soma, trava, usar_trava):
   <p><strong>Ciclo de vida.</strong> Criada por execução (<code>provisionar</code> →
   <code>executar</code> → <code>destruir</code>). A carga dura minutos; manter a máquina ligada
   fora dessa janela é custo sem uso. Como não há estado a preservar entre execuções, recriar não
-  custa nada além da inicialização.</p>
+  custa nada além da inicialização. No Learner Lab o ambiente reforça essa decisão: a sessão do
+  laboratório encerra e para as instâncias automaticamente, de modo que o ciclo por execução é o
+  único regime possível.</p>
 
   <!-- ============================================================ 5 -->
   <h2><span class="n">5</span>Medição</h2>
@@ -373,7 +387,14 @@ def trabalhador(fila, contagem, maior, soma, trava, usar_trava):
   resultado de toda execução é conferido contra o crivo <strong>antes</strong> de o tempo ser
   aceito: tempo bom com resultado errado não conta.</p>
 
-  <p>Todas as execuções foram feitas com a máquina ociosa, sem outra carga concorrente.</p>
+  <p><strong>Onde foi medido.</strong> Os tempos abaixo vêm da <strong>máquina de
+  desenvolvimento da equipe</strong>, identificada a seguir — não da instância na nuvem. O porte
+  de instância disponível no ambiente acadêmico não oferece os núcleos físicos necessários para
+  medir ganho de paralelismo com significado, e medir ali produziria um número que reflete o
+  limite do ambiente, não o do programa. A exigência que de fato importa para o speedup está
+  atendida: sequencial e paralelo foram medidos <strong>na mesma máquina, com a mesma entrada, na
+  mesma invocação</strong>. Todas as execuções foram feitas com a máquina ociosa, sem outra carga
+  concorrente.</p>
 
   <p>Ambiente: Windows 11, AMD Ryzen, <strong>6 núcleos físicos</strong> / 12 lógicos, CPython
   3.14.4, N = 20.000.000, blocos de 10.000. Verificação: 1.270.607 primos, maior 19.999.999, soma

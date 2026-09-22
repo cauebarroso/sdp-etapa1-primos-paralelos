@@ -138,29 +138,41 @@ concorrência exigiria relógios vetoriais.
 
 ---
 
-## 4. Recursos provisionados na nuvem
+## 4. Arquitetura e provisionamento na nuvem
 
-| Decisão | Escolha |
+Esta seção registra as decisões de provisionamento da equipe e a razão de cada uma. O
+ambiente usado é o **AWS Academy (Learner Lab)**, que restringe a região e os portes de
+instância disponíveis; onde isso afeta uma decisão, está anotado. A instância é criada por
+execução (última linha da tabela) e demonstrada ao vivo no console. **A medição relatada na
+seção 5 foi feita na máquina descrita ali**, e não na instância.
+
+| Decisão | Escolha da equipe |
 |---|---|
-| Região / zonas | `sa-east-1` (São Paulo), **uma** zona (`sa-east-1a`) |
-| Instância | 1 × `c5.2xlarge` — 8 vCPU (4 núcleos físicos), 16 GiB |
+| Zonas de disponibilidade | **Uma única zona** — SLA de 99,5 % |
+| Região | A disponibilizada pelo ambiente acadêmico |
+| Instância | **1**, família compute-optimized, o maior porte disponível — alvo: 8 vCPU / 4 núcleos físicos |
 | Armazenamento | EBS **gp3, 20 GB** (disco raiz) |
 | Portas de entrada | **22/tcp** ← `<IP da equipe>/32` · **8000/tcp** ← `0.0.0.0/0` |
 | Ciclo de vida | **Criada por execução** |
 
-**Região e SLA.** Com **instância isolada em uma zona**, o compromisso que passa a valer é
-o de **99,5 %** — **216 minutos** de indisponibilidade admitida em 30 dias. Os **99,99 %**
-(4,3 minutos) exigiriam instâncias em **duas ou mais zonas**. Aceitamos 99,5 %
-conscientemente: a carga é um **lote** de poucos minutos, não um serviço contínuo; se a
-instância cair, repete-se a execução. E há razão de método — a medição exige sequencial e
-paralelo **na mesma máquina**, então duas zonas significariam duas instâncias, o dobro do
-custo e nenhum ganho de medição.
+**Zona única e SLA.** A decisão é operar com **instância isolada em uma única zona**, e com
+isso o compromisso que passa a valer é o de **99,5 %** — **216 minutos** de
+indisponibilidade admitida em 30 dias. Os **99,99 %** (4,3 minutos) exigiriam instâncias em
+**duas ou mais zonas**. Aceitamos 99,5 % conscientemente: a carga é um **lote** de poucos
+minutos, não um serviço contínuo; se a instância cair, repete-se a execução. E há razão de
+método — a medição exige sequencial e paralelo **na mesma máquina**, então duas zonas
+significariam duas instâncias, o dobro do custo e nenhum ganho de medição. A região é a
+disponibilizada pelo ambiente acadêmico, que não permite escolhê-la; o compromisso de SLA
+independe dela.
 
-**Família e tamanho.** A família `c` é otimizada para CPU, que é o nosso gargalo.
-Descartamos a família `t` (burstable) por motivo concreto: ela entrega créditos de CPU que
-se esgotam, e uma medição de minutos terminaria com o desempenho caindo no meio — o tempo
-medido não seria o do algoritmo. Memória não é gargalo: o programa não guarda a lista de
-primos, só acumula três inteiros.
+**Família e porte.** A família `c` (compute-optimized) é a adequada, porque o gargalo é
+CPU. Descartamos a família `t` (burstable) por motivo concreto: ela entrega créditos de CPU
+que se esgotam, e uma medição de minutos terminaria com o desempenho caindo no meio — o
+tempo medido não seria o do algoritmo. Memória não é gargalo: o programa não guarda a lista
+de primos, só acumula três inteiros, e usa poucos MB. O porte-alvo é de 8 vCPU (4 núcleos
+físicos); como o Learner Lab limita os portes, usamos o maior disponível, e é o número de
+núcleos **físicos** efetivo que determina até qual W vale medir — abaixo de dois núcleos
+físicos não há ganho de paralelismo a observar (ver §6.3c).
 
 **Entrada e saída.** Não há arquivo de entrada — a entrada é o parâmetro `N`, e os blocos
 são gerados em memória. A saída são `resultados.json` (~4 KB), `medicao_console.txt`
@@ -181,7 +193,9 @@ segredo em trânsito).
 
 **Ciclo de vida.** Criada por execução (`provisionar` → `executar` → `destruir`). A carga
 dura minutos; manter a máquina ligada fora dessa janela é custo sem uso. Como não há
-estado a preservar entre execuções, recriar não custa nada além da inicialização.
+estado a preservar entre execuções, recriar não custa nada além da inicialização. No
+Learner Lab o ambiente reforça essa decisão: a sessão do laboratório encerra e para as
+instâncias automaticamente, de modo que o ciclo por execução é o único regime possível.
 
 ---
 
@@ -193,7 +207,14 @@ reportada pela **mediana**, cronometrada com `time.perf_counter()`. O resultado 
 execução é conferido contra o crivo **antes** de o tempo ser aceito: tempo bom com
 resultado errado não conta.
 
-Todas as execuções foram feitas com a máquina ociosa, sem outra carga concorrente.
+**Onde foi medido.** Os tempos abaixo vêm da **máquina de desenvolvimento da equipe**,
+identificada a seguir — não da instância na nuvem. O porte de instância disponível no
+ambiente acadêmico não oferece os núcleos físicos necessários para medir ganho de
+paralelismo com significado, e medir ali produziria um número que reflete o limite do
+ambiente, não o do programa. A exigência que de fato importa para o speedup está atendida:
+sequencial e paralelo foram medidos **na mesma máquina, com a mesma entrada, na mesma
+invocação**. Todas as execuções foram feitas com a máquina ociosa, sem outra carga
+concorrente.
 
 Ambiente: Windows 11, AMD Ryzen, **6 núcleos físicos** / 12 lógicos, CPython 3.14.4,
 N = 20.000.000, blocos de 10.000. Verificação: 1.270.607 primos, maior 19.999.999, soma
